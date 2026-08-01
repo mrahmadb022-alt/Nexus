@@ -163,18 +163,21 @@ export default function Profile() {
               return (
                 <div
                   key={appt.id}
-                  className="bg-surface rounded-lg p-4 border border-outline-variant opacity-80 flex justify-between items-center"
+                  className="bg-surface rounded-lg p-4 border border-outline-variant opacity-80 flex items-center justify-between gap-3"
                 >
-                  <div className="flex gap-4 items-center">
+                  <div className="flex gap-4 items-center min-w-0">
                     <div className="w-10 h-10 bg-surface-variant text-on-surface-variant rounded-full flex items-center justify-center shrink-0">
                       <Scissors size={18} />
                     </div>
-                    <div>
-                      <h4 className="font-sans text-[16px] text-on-background">{service ? t(service.nameKey) : ''}</h4>
+                    <div className="min-w-0">
+                      <h4 className="font-sans text-[16px] text-on-background truncate">{service ? t(service.nameKey) : ''}</h4>
                       <p className="font-sans text-body-sm text-on-surface-variant">{formatDateLong(appt.date, lang)}</p>
                     </div>
                   </div>
-                  <button onClick={() => handleRebook(appt)} className="text-primary font-sans text-[14px] hover:underline">
+                  <button
+                    onClick={() => handleRebook(appt)}
+                    className="shrink-0 bg-surface-container text-primary px-4 py-2 rounded-md font-sans text-[14px] font-semibold hover:bg-surface-container-high transition-colors active:scale-95"
+                  >
                     {t('Rebook')}
                   </button>
                 </div>

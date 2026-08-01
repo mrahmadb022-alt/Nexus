@@ -59,6 +59,9 @@ export const translations = {
     'My Appointments': 'My Appointments',
 
     // Explore page sections
+    'Welcome back, {name}': 'Welcome back, {name}',
+    Open: 'Open',
+    'Next Appointment': 'Next Appointment',
     'About Us': 'About Us',
     'about.defaultText':
       'Welcome to our studio — a space built around precision, care, and a genuine passion for the craft. Our team blends technical expertise with a warm, personal touch so every visit feels considered from start to finish.',
@@ -345,6 +348,9 @@ export const translations = {
     'Book Now': 'הזמינו עכשיו',
     'My Appointments': 'התורים שלי',
 
+    'Welcome back, {name}': 'ברוכים הבאים בחזרה, {name}',
+    Open: 'פתוח',
+    'Next Appointment': 'התור הבא',
     'About Us': 'אודותינו',
     'about.defaultText':
       'ברוכים הבאים לסטודיו שלנו - מרחב שנבנה סביב דיוק, תשומת לב אישית ואהבה אמיתית למקצוע. הצוות שלנו משלב מומחיות טכנית עם יחס חם ואישי כך שכל ביקור מרגיש מטופל מההתחלה ועד הסוף.',
@@ -609,6 +615,9 @@ export const translations = {
     'Book Now': 'احجز الآن',
     'My Appointments': 'مواعيدي',
 
+    'Welcome back, {name}': 'مرحبًا بعودتك، {name}',
+    Open: 'مفتوح',
+    'Next Appointment': 'الموعد القادم',
     'About Us': 'من نحن',
     'about.defaultText':
       'مرحبًا بكم في الاستوديو الخاص بنا - مساحة بُنيت على الدقة والعناية والشغف الحقيقي بالمهنة. يجمع فريقنا بين الخبرة الفنية واللمسة الشخصية الدافئة حتى تشعر بأن كل زيارة مدروسة من البداية إلى النهاية.',

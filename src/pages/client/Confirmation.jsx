@@ -16,12 +16,13 @@ export default function Confirmation() {
   const staff = draft.staffId ? getStaffById(draft.staffId) : null
 
   useEffect(() => {
-    if (!draft.serviceId || !draft.date || !draft.time) {
+    // Skip once confirmed: handleDone() clears the draft on its way out, which would
+    // otherwise satisfy this same guard and race navigate('/profile') with a stray
+    // navigate('/services') on Confirmation's last render before it unmounts.
+    if (!confirmed && (!draft.serviceId || !draft.date || !draft.time)) {
       navigate('/services', { replace: true })
     }
-  }, [draft])
-
-  if (!service || !draft.date || !draft.time) return null
+  }, [draft, confirmed])
 
   const handleConfirm = () => {
     confirmDraftBooking()
@@ -51,6 +52,8 @@ export default function Confirmation() {
       </div>
     )
   }
+
+  if (!service || !draft.date || !draft.time) return null
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">

@@ -87,6 +87,16 @@ export function minutesAgoLabel(timestamp) {
   return `${hours}h`
 }
 
+export function isBusinessOpenNow(perDayHours) {
+  const now = new Date()
+  const hours = perDayHours[now.getDay()]
+  if (!hours || !hours.working || hours.locked) return false
+  const [sh, sm] = hours.start.split(':').map(Number)
+  const [eh, em] = hours.end.split(':').map(Number)
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  return nowMinutes >= sh * 60 + sm && nowMinutes < eh * 60 + em
+}
+
 export function generateSlots(start, end, stepMinutes = 30) {
   const slots = []
   const [sh, sm] = start.split(':').map(Number)

@@ -8,6 +8,7 @@ import HeroSection from '../../components/client/landing/HeroSection'
 import AboutSection from '../../components/client/landing/AboutSection'
 import PortfolioMarquee from '../../components/client/landing/PortfolioMarquee'
 import NewsSection from '../../components/client/landing/NewsSection'
+import OffersSection from '../../components/client/landing/OffersSection'
 import ReviewsSection from '../../components/client/landing/ReviewsSection'
 
 export default function Landing() {
@@ -49,6 +50,7 @@ export default function Landing() {
           </section>
         )}
         <NewsSection />
+        <OffersSection />
         <ReviewsSection />
       </main>
 
