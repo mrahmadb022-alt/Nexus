@@ -93,7 +93,7 @@ export default function StaffSelection() {
         </section>
       </main>
 
-      <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:backdrop-blur-none md:pb-8">
+      <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
         <div className="max-w-container-max mx-auto flex justify-end items-center gap-4">
           <button
             onClick={() => navigate('/datetime')}

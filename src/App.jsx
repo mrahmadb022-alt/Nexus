@@ -28,7 +28,7 @@ export default function App() {
     <div className="min-h-screen bg-background text-on-background flex flex-col md:flex-row">
       {isManager && <ManagerSidebar />}
       <main className={`flex-1 min-w-0 ${isManager ? 'pb-24 lg:pb-0' : 'pb-24 md:pb-0'}`}>
-        <Routes>
+        <Routes key={pathname}>
           <Route path="/" element={<Landing />} />
           <Route path="/services" element={<ServiceSelection />} />
           <Route path="/professional" element={<StaffSelection />} />

@@ -6,6 +6,7 @@ import { useData } from '../../context/DataContext'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import HeroSection from '../../components/client/landing/HeroSection'
 import AboutSection from '../../components/client/landing/AboutSection'
+import WelcomeSection from '../../components/client/landing/WelcomeSection'
 import PortfolioMarquee from '../../components/client/landing/PortfolioMarquee'
 import NewsSection from '../../components/client/landing/NewsSection'
 import OffersSection from '../../components/client/landing/OffersSection'
@@ -25,7 +26,7 @@ export default function Landing() {
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
-      <header className="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto bg-surface z-10 relative">
+      <header className="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto bg-surface z-30 relative">
         <h1 className="font-sans text-display-lg-mobile text-primary tracking-tight">{t('Nexus Booking')}</h1>
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
@@ -43,6 +44,7 @@ export default function Landing() {
       <main className="flex-grow flex flex-col w-full max-w-container-max mx-auto px-margin-mobile gap-16 py-6 pb-32">
         <HeroSection />
         <AboutSection />
+        <WelcomeSection />
         {gallery.length > 0 && (
           <section className="flex flex-col gap-6">
             <h2 className="font-sans text-display-lg-mobile text-on-background text-center">{t('Our Work')}</h2>
@@ -54,7 +56,7 @@ export default function Landing() {
         <ReviewsSection />
       </main>
 
-      <div className="fixed bottom-0 start-0 w-full p-4 pb-safe bg-surface/80 backdrop-blur-md border-t border-surface-container-highest z-50">
+      <div className="fixed bottom-20 md:bottom-0 start-0 w-full p-4 pb-safe bg-surface-container-lowest border-t border-surface-container-highest z-30">
         <div className="max-w-container-max mx-auto flex justify-center">
           <button
             onClick={() => navigate('/services')}
