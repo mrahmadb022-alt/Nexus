@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Manrope', system-ui, sans-serif;
+}
+
+[lang='he'] {
+  --font-sans: 'Noto Sans Hebrew', 'Manrope', system-ui, sans-serif;
+}
+
+[lang='ar'] {
+  --font-sans: 'Noto Kufi Arabic', 'Manrope', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* RTL mirroring for directional icons that don't auto-flip via logical properties */
+[dir='rtl'] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-on-primary rounded font-semibold shadow-sm hover:bg-primary-container transition-colors active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply bg-transparent border border-outline text-primary rounded font-semibold hover:bg-surface-container transition-colors active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply bg-surface-container text-on-surface-variant rounded font-semibold hover:bg-surface-container-high transition-colors active:scale-[0.98];
+  }
+  .card-client {
+    @apply bg-surface-container-lowest rounded-xl shadow-card-client border border-surface-variant/60;
+  }
+  .card-manager {
+    @apply bg-surface rounded-md border border-outline-variant/40;
+  }
+  .input-field {
+    @apply bg-surface border border-outline-variant rounded px-4 py-3 text-body-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all;
+  }
+  .status-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-mono text-label-caps;
+  }
+}
