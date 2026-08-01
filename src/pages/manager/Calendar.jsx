@@ -61,8 +61,8 @@ export default function ManagerCalendar() {
       <div className="flex-1 p-gutter lg:p-margin-desktop">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="font-display-lg text-display-lg text-primary">{t('Schedule')}</h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">{t('Manage weekly availability and working hours.')}</p>
+            <h2 className="font-sans text-display-lg text-primary">{t('Schedule')}</h2>
+            <p className="font-sans text-body-lg text-on-surface-variant mt-1">{t('Manage weekly availability and working hours.')}</p>
           </div>
           <div className="flex items-center gap-2 bg-surface-container-low rounded-md p-1 border border-outline-variant shadow-sm self-start">
             <button
@@ -72,7 +72,7 @@ export default function ManagerCalendar() {
             >
               <PrevIcon size={20} />
             </button>
-            <span className="font-headline-md text-headline-md px-4 py-1 text-primary min-w-[190px] text-center">
+            <span className="font-sans text-headline-md px-4 py-1 text-primary min-w-[190px] text-center">
               {formatDateRange(weekStart, weekEnd, lang)}
             </span>
             <button
@@ -110,7 +110,7 @@ export default function ManagerCalendar() {
                     <div className={`font-mono text-label-caps uppercase ${isToday ? 'text-primary' : 'text-outline'}`}>
                       {t(WEEKDAY_KEYS[i])}
                     </div>
-                    <div className={`font-headline-md text-headline-md ${isToday ? 'text-primary font-bold' : 'text-on-surface'}`}>
+                    <div className={`font-sans text-headline-md ${isToday ? 'text-primary font-bold' : 'text-on-surface'}`}>
                       {date.getDate()}
                     </div>
                   </div>
@@ -131,13 +131,13 @@ export default function ManagerCalendar() {
                 {hours.locked ? (
                   <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
                     <PlaneTakeoff className="text-error" size={26} />
-                    <span className="font-headline-md text-body-sm text-on-error-container font-semibold">{t('Vacation / Locked')}</span>
-                    <p className="font-body-sm text-[12px] text-on-error-container/80">{t('cal.lockedBody')}</p>
+                    <span className="font-sans text-body-sm text-on-error-container font-semibold">{t('Vacation / Locked')}</span>
+                    <p className="font-sans text-[12px] text-on-error-container/80">{t('cal.lockedBody')}</p>
                   </div>
                 ) : (
                   <>
                     <label className="flex items-center justify-between cursor-pointer">
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">{t('Working Day')}</span>
+                      <span className="font-sans text-body-sm text-on-surface-variant">{t('Working Day')}</span>
                       <div className="relative">
                         <input
                           type="checkbox"
@@ -162,13 +162,13 @@ export default function ManagerCalendar() {
                         </div>
                       </div>
                     ) : (
-                      <p className="font-body-sm text-body-sm text-on-surface-variant py-2 text-center">{t('Closed')}</p>
+                      <p className="font-sans text-body-sm text-on-surface-variant py-2 text-center">{t('Closed')}</p>
                     )}
 
                     <div className="border-t border-outline-variant/50 pt-3 flex flex-col gap-2">
                       <span className="font-mono text-label-caps text-on-surface-variant">{t('Appointments Today')}</span>
                       {dayAppointments.length === 0 && (
-                        <span className="font-body-sm text-[12px] text-on-surface-variant">{t('No appointments')}</span>
+                        <span className="font-sans text-[12px] text-on-surface-variant">{t('No appointments')}</span>
                       )}
                       {dayAppointments.slice(0, 4).map((appt) => {
                         const svc = SERVICES.find((s) => s.id === appt.serviceId)

@@ -4,11 +4,11 @@ import ClientBottomNav from './components/client/ClientBottomNav'
 import ManagerSidebar from './components/manager/ManagerSidebar'
 import ManagerBottomNav from './components/manager/ManagerBottomNav'
 import Landing from './pages/client/Landing'
-import ServiceStaffSelection from './pages/client/ServiceStaffSelection'
+import ServiceSelection from './pages/client/ServiceSelection'
+import StaffSelection from './pages/client/StaffSelection'
 import DateTimeSelection from './pages/client/DateTimeSelection'
 import Confirmation from './pages/client/Confirmation'
-import MyAppointments from './pages/client/MyAppointments'
-import Reviews from './pages/client/Reviews'
+import Profile from './pages/client/Profile'
 import ManagerOverview from './pages/manager/Overview'
 import ManagerCalendar from './pages/manager/Calendar'
 import GalleryStaff from './pages/manager/GalleryStaff'
@@ -16,10 +16,11 @@ import Marketing from './pages/manager/Marketing'
 import BusinessSettings from './pages/manager/Settings'
 
 export default function App() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    // Skip when a hash anchor is present — the destination page owns scrolling to it.
+    if (!hash) window.scrollTo(0, 0)
+  }, [pathname, hash])
 
   const isManager = pathname.startsWith('/manager')
 
@@ -29,11 +30,11 @@ export default function App() {
       <main className={`flex-1 min-w-0 ${isManager ? 'pb-24 lg:pb-0' : 'pb-24 md:pb-0'}`}>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/services" element={<ServiceStaffSelection />} />
+          <Route path="/services" element={<ServiceSelection />} />
+          <Route path="/professional" element={<StaffSelection />} />
           <Route path="/datetime" element={<DateTimeSelection />} />
           <Route path="/confirm" element={<Confirmation />} />
-          <Route path="/appointments" element={<MyAppointments />} />
-          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/manager" element={<ManagerOverview />} />
           <Route path="/manager/calendar" element={<ManagerCalendar />} />
           <Route path="/manager/staff" element={<GalleryStaff />} />

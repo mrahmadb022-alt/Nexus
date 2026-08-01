@@ -67,7 +67,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
       <div className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:w-[520px] bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl shadow-modal flex flex-col max-h-[90vh] sm:max-h-[85vh] overflow-hidden">
         <div className="px-6 py-5 border-b border-outline-variant flex justify-between items-center sticky top-0 bg-surface-container-lowest z-10">
-          <h3 className="font-headline-md text-headline-md text-on-background">{t('Reschedule Appointment')}</h3>
+          <h3 className="font-sans text-headline-md text-on-background">{t('Reschedule Appointment')}</h3>
           <button
             onClick={onClose}
             aria-label={t('Close')}
@@ -80,7 +80,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
         <div className="p-6 overflow-y-auto flex flex-col gap-8">
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <span className="font-headline-md text-body-lg text-on-background font-semibold">{formatMonthYear(viewMonth, lang)}</span>
+              <span className="font-sans text-body-lg text-on-background font-semibold">{formatMonthYear(viewMonth, lang)}</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))}
@@ -123,7 +123,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
                       setSelectedDate(iso)
                       setSelectedTime(null)
                     }}
-                    className={`aspect-square rounded-full flex items-center justify-center font-body-sm transition-colors ${
+                    className={`aspect-square rounded-full flex items-center justify-center font-sans transition-colors ${
                       disabled
                         ? 'text-outline opacity-40 cursor-not-allowed'
                         : isSelected
@@ -139,7 +139,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
           </div>
 
           <div className="flex flex-col gap-4">
-            <span className="font-headline-md text-body-lg text-on-background font-semibold">{t('Select Time')}</span>
+            <span className="font-sans text-body-lg text-on-background font-semibold">{t('Select Time')}</span>
             {availableSlots.length > 0 ? (
               <div className="grid grid-cols-3 gap-3">
                 {availableSlots.map((slot) => {
@@ -148,7 +148,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
                     <button
                       key={slot}
                       onClick={() => setSelectedTime(slot)}
-                      className={`py-3 px-2 rounded-xl border font-body-sm transition-colors relative ${
+                      className={`py-3 px-2 rounded-xl border font-sans transition-colors relative ${
                         active
                           ? 'border-2 border-primary bg-surface-container text-primary font-semibold'
                           : 'border-outline-variant text-on-background hover:border-primary hover:text-primary'
@@ -165,7 +165,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
                 })}
               </div>
             ) : (
-              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('Fully Booked')}</p>
+              <p className="font-sans text-body-sm text-on-surface-variant">{t('Fully Booked')}</p>
             )}
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
           <button
             disabled={!selectedDate || !selectedTime}
             onClick={() => onConfirm(selectedDate, selectedTime)}
-            className="w-full bg-primary text-on-primary py-4 rounded-xl font-headline-md text-body-lg font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
+            className="w-full bg-primary text-on-primary py-4 rounded-xl font-sans text-body-lg font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
           >
             {t('Confirm New Time')}
           </button>

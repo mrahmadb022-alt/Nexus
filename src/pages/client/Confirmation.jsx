@@ -30,7 +30,7 @@ export default function Confirmation() {
 
   const handleDone = () => {
     resetDraft()
-    navigate('/appointments')
+    navigate('/profile#appointments')
   }
 
   if (confirmed) {
@@ -39,11 +39,11 @@ export default function Confirmation() {
         <div className="w-20 h-20 rounded-full bg-success-container text-on-success-container flex items-center justify-center mb-6">
           <CheckCircle2 size={40} />
         </div>
-        <h1 className="font-display-lg text-display-lg text-on-background mb-3">{t('Booking Confirmed')}</h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-sm mb-8">{t('confirm.successBody')}</p>
+        <h1 className="font-sans text-display-lg text-on-background mb-3">{t('Booking Confirmed')}</h1>
+        <p className="font-sans text-body-lg text-on-surface-variant max-w-sm mb-8">{t('confirm.successBody')}</p>
         <button
           onClick={handleDone}
-          className="h-14 px-8 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md flex items-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"
+          className="h-14 px-8 bg-primary text-on-primary rounded-xl font-sans text-headline-md flex items-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"
         >
           {t('My Appointments')}
           <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />
@@ -55,14 +55,14 @@ export default function Confirmation() {
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="bg-surface flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto sticky top-0 z-30">
-        <div className="font-display-lg-mobile text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</div>
+        <div className="font-sans text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</div>
       </header>
 
       <main className="flex-grow w-full max-w-4xl mx-auto px-margin-mobile py-8 flex flex-col gap-10 pb-32">
-        <StepIndicator step={3} />
+        <StepIndicator step={4} />
 
         <section className="flex flex-col gap-6">
-          <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary">
+          <h1 className="font-sans md:font-sans text-display-lg-mobile md:text-display-lg text-primary">
             {t('Confirm Booking')}
           </h1>
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card-client border border-surface-variant flex flex-col gap-8">
@@ -72,9 +72,9 @@ export default function Confirmation() {
               </div>
               <div className="flex-grow flex flex-col gap-4">
                 <div>
-                  <h3 className="font-headline-md text-headline-md text-on-background">{t(service.nameKey)}</h3>
+                  <h3 className="font-sans text-headline-md text-on-background">{t(service.nameKey)}</h3>
                   {staff && (
-                    <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">
+                    <p className="font-sans text-body-lg text-on-surface-variant mt-1">
                       {t('with')} {staff.name}
                     </p>
                   )}
@@ -82,13 +82,13 @@ export default function Confirmation() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
                     <span className="font-mono text-label-caps text-on-surface-variant">{t('Date')}</span>
-                    <span className="font-headline-md text-[16px] text-on-background flex items-center gap-2">
+                    <span className="font-sans text-[16px] text-on-background flex items-center gap-2">
                       <CalendarDays size={18} className="text-primary" /> {formatDateFull(draft.date, lang)}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="font-mono text-label-caps text-on-surface-variant">{t('Time')}</span>
-                    <span className="font-headline-md text-[16px] text-on-background flex items-center gap-2">
+                    <span className="font-sans text-[16px] text-on-background flex items-center gap-2">
                       <Clock size={18} className="text-primary" /> {formatTime(draft.time, lang)}
                     </span>
                   </div>
@@ -96,28 +96,28 @@ export default function Confirmation() {
               </div>
               <div className="md:text-end flex flex-col gap-1 md:shrink-0 border-t md:border-t-0 md:border-s border-outline-variant pt-4 md:pt-0 md:ps-6">
                 <span className="font-mono text-label-caps text-on-surface-variant">{t('Total')}</span>
-                <span className="font-display-lg-mobile text-display-lg-mobile text-primary">${service.price.toFixed(2)}</span>
+                <span className="font-sans text-display-lg-mobile text-primary">${service.price.toFixed(2)}</span>
               </div>
             </div>
 
             <div className="bg-surface p-4 rounded-xl border border-outline-variant flex items-start gap-3">
               <MapPin className="text-on-surface-variant mt-0.5" size={20} />
               <div>
-                <p className="font-headline-md text-[16px] text-on-background">{businessSettings.name}</p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant whitespace-pre-line">{businessSettings.address}</p>
+                <p className="font-sans text-[16px] text-on-background">{businessSettings.name}</p>
+                <p className="font-sans text-body-sm text-on-surface-variant whitespace-pre-line">{businessSettings.address}</p>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-outline-variant">
               <button
                 onClick={handleConfirm}
-                className="flex-grow bg-primary text-on-primary py-4 px-6 rounded-xl font-headline-md text-[16px] font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-95 flex items-center justify-center gap-2"
+                className="flex-grow bg-primary text-on-primary py-4 px-6 rounded-xl font-sans text-[16px] font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-95 flex items-center justify-center gap-2"
               >
                 {t('Confirm Appointment')} <CheckCircle2 size={20} />
               </button>
               <button
                 onClick={() => navigate('/services')}
-                className="sm:w-auto bg-transparent border border-outline text-primary py-4 px-6 rounded-xl font-headline-md text-[16px] font-bold hover:bg-surface-container transition-colors active:scale-95"
+                className="sm:w-auto bg-transparent border border-outline text-primary py-4 px-6 rounded-xl font-sans text-[16px] font-bold hover:bg-surface-container transition-colors active:scale-95"
               >
                 {t('Edit Details')}
               </button>

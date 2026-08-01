@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
-import { useData } from '../../context/DataContext'
+import { useData, MOCK_CLIENT_ID } from '../../context/DataContext'
 import { formatDateLong, formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
 
@@ -11,7 +11,11 @@ const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 export default function DateTimeSelection() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, setDraftDateTime, perDayHours, appointments } = useData()
+  const { draft, setDraftDateTime, perDayHours, appointments, waitlist, joinWaitlist } = useData()
+
+  useEffect(() => {
+    if (!draft.serviceId) navigate('/services', { replace: true })
+  }, [draft.serviceId])
 
   const today = useMemo(() => {
     const d = new Date()
@@ -73,6 +77,13 @@ export default function DateTimeSelection() {
     navigate('/confirm')
   }
 
+  const alreadyOnWaitlist = waitlist.some((w) => w.clientId === MOCK_CLIENT_ID && w.date === selectedDate)
+
+  const handleJoinWaitlist = () => {
+    if (alreadyOnWaitlist) return
+    joinWaitlist(selectedDate)
+  }
+
   const PrevIcon = isRtl ? ChevronRight : ChevronLeft
   const NextIcon = isRtl ? ChevronLeft : ChevronRight
 
@@ -80,24 +91,24 @@ export default function DateTimeSelection() {
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="bg-surface flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto sticky top-0 z-30">
         <button
-          onClick={() => navigate('/services')}
+          onClick={() => navigate('/professional')}
           aria-label={t('Back')}
           className="text-primary hover:bg-surface-container transition-colors p-2 -ms-2 rounded-full active:scale-95"
         >
           <ArrowLeft size={22} className={isRtl ? 'rtl-mirror' : ''} />
         </button>
-        <h1 className="font-display-lg-mobile text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</h1>
+        <h1 className="font-sans text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</h1>
         <div className="w-10" />
       </header>
 
       <main className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile py-8 space-y-10 pb-40">
-        <StepIndicator step={2} />
+        <StepIndicator step={3} />
 
         <section className="max-w-2xl mx-auto w-full">
-          <h2 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-2">
+          <h2 className="font-sans md:font-sans text-display-lg-mobile md:text-display-lg text-primary mb-2">
             {t('Select Date & Time')}
           </h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant mb-8">{t("Choose when you'd like your appointment.")}</p>
+          <p className="font-sans text-body-lg text-on-surface-variant mb-8">{t("Choose when you'd like your appointment.")}</p>
 
           <div className="bg-surface shadow-card-client rounded-2xl p-6 mb-8 border border-surface-variant">
             <div className="flex items-center justify-between mb-6">
@@ -108,7 +119,7 @@ export default function DateTimeSelection() {
               >
                 <PrevIcon size={20} />
               </button>
-              <h3 className="font-headline-md text-headline-md text-primary">{formatMonthYear(viewMonth, lang)}</h3>
+              <h3 className="font-sans text-headline-md text-primary">{formatMonthYear(viewMonth, lang)}</h3>
               <button
                 aria-label={t('Next Week')}
                 onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))}
@@ -138,7 +149,7 @@ export default function DateTimeSelection() {
                     <button
                       key={day}
                       disabled
-                      className="h-10 flex items-center justify-center font-body-lg text-body-lg text-on-surface-variant opacity-30 cursor-not-allowed"
+                      className="h-10 flex items-center justify-center font-sans text-body-lg text-on-surface-variant opacity-30 cursor-not-allowed"
                     >
                       {day}
                     </button>
@@ -148,7 +159,7 @@ export default function DateTimeSelection() {
                   <button
                     key={day}
                     onClick={() => handleSelectDay(day)}
-                    className={`h-10 flex items-center justify-center font-body-lg text-body-lg rounded transition-colors relative group ${
+                    className={`h-10 flex items-center justify-center font-sans text-body-lg rounded transition-colors relative group ${
                       isSelected
                         ? 'bg-primary text-on-primary shadow-sm'
                         : 'text-on-background hover:bg-surface-container'
@@ -181,7 +192,7 @@ export default function DateTimeSelection() {
 
           {availableSlotsToday.length > 0 ? (
             <div className="mb-8">
-              <h3 className="font-headline-md text-headline-md text-primary mb-4">
+              <h3 className="font-sans text-headline-md text-primary mb-4">
                 {t('Available on')} {formatDateLong(selectedDate, lang)}
               </h3>
               <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar snap-x">
@@ -203,14 +214,27 @@ export default function DateTimeSelection() {
                 })}
               </div>
             </div>
+          ) : alreadyOnWaitlist ? (
+            <div className="mb-8 p-6 bg-success-container/40 rounded-2xl border border-success-container flex items-start gap-4">
+              <CheckCircle2 className="text-on-success-container shrink-0" size={22} />
+              <div>
+                <h4 className="font-sans text-headline-md text-on-background mb-1">{t('waitlist.joinedTitle')}</h4>
+                <p className="font-sans text-body-sm text-on-surface-variant">
+                  {t('waitlist.joinedBody').replace('{date}', formatDateLong(selectedDate, lang))}
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="mb-8 p-6 bg-error-container/30 rounded-2xl border border-error-container">
               <div className="flex items-start gap-4">
                 <AlertCircle className="text-error shrink-0" size={22} />
                 <div>
-                  <h4 className="font-headline-md text-headline-md text-on-background mb-1">{t('Fully Booked')}</h4>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-4">{t('dt.fullyBookedBody')}</p>
-                  <button className="bg-surface text-error border border-error px-4 py-2 rounded-full font-mono text-label-caps hover:bg-error-container transition-colors">
+                  <h4 className="font-sans text-headline-md text-on-background mb-1">{t('Fully Booked')}</h4>
+                  <p className="font-sans text-body-sm text-on-surface-variant mb-4">{t('dt.fullyBookedBody')}</p>
+                  <button
+                    onClick={handleJoinWaitlist}
+                    className="bg-surface text-error border border-error px-4 py-2 rounded-full font-mono text-label-caps hover:bg-error-container transition-colors"
+                  >
                     {t('Join Waitlist')}
                   </button>
                 </div>
@@ -225,7 +249,7 @@ export default function DateTimeSelection() {
           <button
             disabled={!canContinue}
             onClick={handleContinue}
-            className="flex-1 py-4 bg-primary text-on-primary rounded-full font-headline-md text-headline-md hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+            className="flex-1 py-4 bg-primary text-on-primary rounded-full font-sans text-headline-md hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
           >
             {t('Continue')}
             <ArrowRight size={18} className={isRtl ? 'rtl-mirror' : ''} />

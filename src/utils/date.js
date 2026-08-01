@@ -67,6 +67,26 @@ export function formatDateRange(startDate, endDate, lang) {
   return `${startLabel} – ${endLabel}`
 }
 
+export function daysSince(isoDate) {
+  const then = new Date(isoDate + 'T00:00:00')
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  return Math.max(0, Math.round((now - then) / 86400000))
+}
+
+export function agoLabel(isoDate, t) {
+  const days = daysSince(isoDate)
+  if (days < 7) return t('ago.days').replace('{n}', days)
+  return t('ago.weeks').replace('{n}', Math.round(days / 7))
+}
+
+export function minutesAgoLabel(timestamp) {
+  const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000))
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.round(minutes / 60)
+  return `${hours}h`
+}
+
 export function generateSlots(start, end, stepMinutes = 30) {
   const slots = []
   const [sh, sm] = start.split(':').map(Number)

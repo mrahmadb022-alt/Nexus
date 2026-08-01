@@ -51,6 +51,36 @@ body {
   transform: scaleX(-1);
 }
 
+/* Continuous portfolio marquee — direction chosen explicitly (see PortfolioMarquee.jsx),
+   the track forces direction:ltr so translateX math stays predictable regardless of page dir. */
+@keyframes nb-marquee-ltr {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes nb-marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+.nb-marquee-track {
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.nb-marquee-ltr {
+  animation-name: nb-marquee-ltr;
+}
+.nb-marquee-rtl {
+  animation-name: nb-marquee-rtl;
+}
+
 @layer components {
   .btn-primary {
     @apply bg-primary text-on-primary rounded font-semibold shadow-sm hover:bg-primary-container transition-colors active:scale-[0.98];

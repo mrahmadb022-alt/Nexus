@@ -4,8 +4,9 @@ import { useLanguage } from '../../context/LanguageContext'
 
 const STEPS = [
   { n: 1, key: 'SERVICE' },
-  { n: 2, key: 'TIME' },
-  { n: 3, key: 'CONFIRM' },
+  { n: 2, key: 'STAFF' },
+  { n: 3, key: 'TIME' },
+  { n: 4, key: 'CONFIRM' },
 ]
 
 export default function StepIndicator({ step }) {
@@ -17,7 +18,7 @@ export default function StepIndicator({ step }) {
         <Fragment key={s.key}>
           <div className="flex flex-col items-center gap-1">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-headline-md text-body-sm shadow-sm transition-colors ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-sans text-body-sm shadow-sm transition-colors ${
                 s.n < step
                   ? 'bg-primary text-on-primary'
                   : s.n === step

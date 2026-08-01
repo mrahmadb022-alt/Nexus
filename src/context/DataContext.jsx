@@ -80,12 +80,12 @@ const INITIAL_GALLERY = [
 ]
 
 const INITIAL_REVIEWS = [
-  { id: 'r1', name: 'Sarah Jenkins', initials: 'SJ', rating: 5, textKey: 'review.1', daysAgo: 2 },
-  { id: 'r2', name: 'Michael R.', initials: 'MR', rating: 4, textKey: 'review.2', daysAgo: 7 },
-  { id: 'r3', name: 'Emma Thompson', initials: 'ET', rating: 5, textKey: 'review.3', daysAgo: 14 },
-  { id: 'r4', name: 'James Okafor', initials: 'JO', rating: 5, textKey: 'review.4', daysAgo: 18 },
-  { id: 'r5', name: 'Priya Patel', initials: 'PP', rating: 5, textKey: 'review.5', daysAgo: 25 },
-  { id: 'r6', name: 'Lucas Meyer', initials: 'LM', rating: 4, textKey: 'review.6', daysAgo: 30 },
+  { id: 'r1', name: 'Sarah Jenkins', initials: 'SJ', rating: 5, textKey: 'review.1', date: iso(-2) },
+  { id: 'r2', name: 'Michael R.', initials: 'MR', rating: 4, textKey: 'review.2', date: iso(-7) },
+  { id: 'r3', name: 'Emma Thompson', initials: 'ET', rating: 5, textKey: 'review.3', date: iso(-14) },
+  { id: 'r4', name: 'James Okafor', initials: 'JO', rating: 5, textKey: 'review.4', date: iso(-18) },
+  { id: 'r5', name: 'Priya Patel', initials: 'PP', rating: 5, textKey: 'review.5', date: iso(-25) },
+  { id: 'r6', name: 'Lucas Meyer', initials: 'LM', rating: 4, textKey: 'review.6', date: iso(-30) },
 ]
 
 const INITIAL_ANNOUNCEMENTS = [
@@ -180,8 +180,8 @@ const INITIAL_APPOINTMENTS = [
 ]
 
 const INITIAL_WAITLIST = [
-  { id: 'w1', name: 'Amanda Lee', noteKey: 'Needs:', detail: 'Any cut before 4PM', minutesAgo: 10 },
-  { id: 'w2', name: 'David Chen', noteKey: 'Needs:', detail: 'Color touch-up (urgent)', minutesAgo: 60 },
+  { id: 'w1', clientId: 'c-amanda', clientName: 'Amanda Lee', date: iso(2), note: 'Any cut before 4PM', createdAt: Date.now() - 10 * 60000 },
+  { id: 'w2', clientId: 'c-david2', clientName: 'David Chen', date: iso(1), note: 'Color touch-up (urgent)', createdAt: Date.now() - 60 * 60000 },
 ]
 
 const DEFAULT_PER_DAY_HOURS = {
@@ -200,6 +200,24 @@ const DEFAULT_BUSINESS_SETTINGS = {
   phone: '+1 (555) 123-4567',
   address: '123 Main Street, Suite 200\nMetropolis, NY 10001',
   timezone: 'est',
+  heroBackground: 'https://picsum.photos/seed/nexus-hero-bg/1600/900',
+  logoUrl: null,
+  about: null,
+}
+
+const DEFAULT_CLIENT_PROFILE = {
+  name: 'You',
+  phone: '',
+  email: '',
+}
+
+function initialsFromName(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 'YO'
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0].toUpperCase())
+    .join('')
 }
 
 export function DataProvider({ children }) {
@@ -212,6 +230,7 @@ export function DataProvider({ children }) {
   const [waitlist, setWaitlist] = useState(INITIAL_WAITLIST)
   const [perDayHours, setPerDayHours] = useState(DEFAULT_PER_DAY_HOURS)
   const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
+  const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
 
   // Booking draft (multi-step client flow)
   const [draft, setDraft] = useState({ serviceId: null, staffId: null, date: null, time: null })
@@ -225,8 +244,8 @@ export function DataProvider({ children }) {
     const newAppt = {
       id: `apt-${Date.now()}`,
       clientId: MOCK_CLIENT_ID,
-      clientName: 'You',
-      initials: 'YO',
+      clientName: clientProfile.name || 'You',
+      initials: initialsFromName(clientProfile.name || 'You'),
       serviceId: draft.serviceId,
       staffId: draft.staffId,
       date: draft.date,
@@ -248,6 +267,33 @@ export function DataProvider({ children }) {
 
   const approveWaitlist = (id) => setWaitlist((prev) => prev.filter((w) => w.id !== id))
   const declineWaitlist = (id) => setWaitlist((prev) => prev.filter((w) => w.id !== id))
+  const joinWaitlist = (date, note = '') => {
+    const entry = {
+      id: `w-${Date.now()}`,
+      clientId: MOCK_CLIENT_ID,
+      clientName: clientProfile.name || 'You',
+      date,
+      note,
+      createdAt: Date.now(),
+    }
+    setWaitlist((prev) => [entry, ...prev])
+    return entry
+  }
+
+  const addReview = (rating, text) => {
+    const name = clientProfile.name || 'You'
+    const review = {
+      id: `r-${Date.now()}`,
+      clientId: MOCK_CLIENT_ID,
+      name,
+      initials: initialsFromName(name),
+      rating,
+      text,
+      date: toISODate(new Date()),
+    }
+    setReviews((prev) => [review, ...prev])
+    return review
+  }
 
   const addPhoto = (url) => setGallery((prev) => [...prev, { id: `g-${Date.now()}`, url }])
   const removePhotos = (ids) => setGallery((prev) => prev.filter((g) => !ids.includes(g.id)))
@@ -269,6 +315,7 @@ export function DataProvider({ children }) {
     setPerDayHours((prev) => ({ ...prev, [dayIndex]: { ...prev[dayIndex], locked: !prev[dayIndex].locked } }))
 
   const updateBusinessSettings = (patch) => setBusinessSettings((prev) => ({ ...prev, ...patch }))
+  const updateClientProfile = (patch) => setClientProfile((prev) => ({ ...prev, ...patch }))
 
   const getStaffById = (id) => staffList.find((s) => s.id === id)
 
@@ -282,6 +329,7 @@ export function DataProvider({ children }) {
     waitlist,
     perDayHours,
     businessSettings,
+    clientProfile,
     draft,
 
     setDraftService,
@@ -294,6 +342,8 @@ export function DataProvider({ children }) {
     updateAppointmentStatus,
     approveWaitlist,
     declineWaitlist,
+    joinWaitlist,
+    addReview,
     addPhoto,
     removePhotos,
     addStaffMember,
@@ -305,6 +355,7 @@ export function DataProvider({ children }) {
     updateDayHours,
     toggleDayLock,
     updateBusinessSettings,
+    updateClientProfile,
     getStaffById,
   }
 

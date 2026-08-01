@@ -1,44 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Sparkles, ShieldCheck } from 'lucide-react'
+import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
+import { useData } from '../../context/DataContext'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
-
-const SLIDES = [
-  {
-    titleKey: 'Signature Styling',
-    bodyKey: 'Precision service tailored to your lifestyle.',
-    image: 'https://picsum.photos/seed/nexus-hero-1/900/1200',
-  },
-  {
-    titleKey: 'Premium Care',
-    bodyKey: 'Experience the finest in professional treatments.',
-    image: 'https://picsum.photos/seed/nexus-hero-2/900/1200',
-  },
-  {
-    titleKey: 'Expert Team',
-    bodyKey: 'Dedicated professionals committed to your best results.',
-    image: 'https://picsum.photos/seed/nexus-hero-3/900/1200',
-  },
-]
+import HeroSection from '../../components/client/landing/HeroSection'
+import AboutSection from '../../components/client/landing/AboutSection'
+import PortfolioMarquee from '../../components/client/landing/PortfolioMarquee'
+import NewsSection from '../../components/client/landing/NewsSection'
+import ReviewsSection from '../../components/client/landing/ReviewsSection'
 
 export default function Landing() {
   const { t, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const [index, setIndex] = useState(0)
-  const timerRef = useRef(null)
+  const location = useLocation()
+  const { gallery } = useData()
 
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setIndex((i) => (i + 1) % SLIDES.length)
-    }, 5000)
-    return () => clearInterval(timerRef.current)
-  }, [])
+    if (location.hash === '#reviews') {
+      document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [location.hash])
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto bg-surface z-10 relative">
-        <h1 className="font-display-lg-mobile text-display-lg-mobile text-primary tracking-tight">{t('Nexus Booking')}</h1>
+        <h1 className="font-sans text-display-lg-mobile text-primary tracking-tight">{t('Nexus Booking')}</h1>
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
           <button
@@ -52,51 +39,24 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="flex-grow flex flex-col w-full max-w-container-max mx-auto relative overflow-hidden">
-        <section className="relative w-full h-[56vh] min-h-[360px] mt-4 px-margin-mobile">
-          <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-card-client-lg">
-            {SLIDES.map((slide, i) => (
-              <div
-                key={slide.titleKey}
-                className={`absolute inset-0 transition-opacity duration-700 ${i === index ? 'opacity-100' : 'opacity-0'}`}
-              >
-                <img src={slide.image} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/70 to-transparent" />
-                <div className="absolute bottom-8 start-8 end-8 text-on-tertiary">
-                  <h2 className="font-headline-md text-headline-md mb-2">{t(slide.titleKey)}</h2>
-                  <p className="font-body-sm text-body-sm opacity-90">{t(slide.bodyKey)}</p>
-                </div>
-              </div>
-            ))}
-            <div className="absolute bottom-4 start-0 end-0 flex justify-center gap-2">
-              {SLIDES.map((slide, i) => (
-                <button
-                  key={slide.titleKey}
-                  aria-label={`Slide ${i + 1}`}
-                  onClick={() => setIndex(i)}
-                  className={`h-1.5 rounded-full transition-all ${i === index ? 'w-6 bg-on-tertiary' : 'w-1.5 bg-on-tertiary/50'}`}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="px-margin-mobile mt-12 mb-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-low mb-6">
-              <Sparkles className="text-primary" size={28} />
-            </div>
-            <h3 className="font-display-lg-mobile text-display-lg-mobile text-on-background mb-4">{t('Elevate Your Experience')}</h3>
-            <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">{t('landing.intro')}</p>
-          </div>
-        </section>
+      <main className="flex-grow flex flex-col w-full max-w-container-max mx-auto px-margin-mobile gap-16 py-6 pb-32">
+        <HeroSection />
+        <AboutSection />
+        {gallery.length > 0 && (
+          <section className="flex flex-col gap-6">
+            <h2 className="font-sans text-display-lg-mobile text-on-background text-center">{t('Our Work')}</h2>
+            <PortfolioMarquee photos={gallery} />
+          </section>
+        )}
+        <NewsSection />
+        <ReviewsSection />
       </main>
 
-      <div className="sticky bottom-0 w-full p-4 pb-safe bg-surface/80 backdrop-blur-md border-t border-surface-container-highest z-40 md:static md:border-0 md:bg-transparent md:backdrop-blur-none md:pb-12">
+      <div className="fixed bottom-0 start-0 w-full p-4 pb-safe bg-surface/80 backdrop-blur-md border-t border-surface-container-highest z-50">
         <div className="max-w-container-max mx-auto flex justify-center">
           <button
             onClick={() => navigate('/services')}
-            className="w-full md:w-auto md:min-w-[300px] h-14 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"
+            className="w-full md:w-auto md:min-w-[300px] h-14 bg-primary text-on-primary rounded-xl font-sans text-headline-md flex items-center justify-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"
           >
             {t('Book Now')}
             <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />

@@ -58,12 +58,44 @@ export const translations = {
     'Book Now': 'Book Now',
     'My Appointments': 'My Appointments',
 
+    // Explore page sections
+    'About Us': 'About Us',
+    'about.defaultText':
+      'Welcome to our studio — a space built around precision, care, and a genuine passion for the craft. Our team blends technical expertise with a warm, personal touch so every visit feels considered from start to finish.',
+    'Our Work': 'Our Work',
+    'News & Updates': 'News & Updates',
+
+    // Reviews (now embedded in Explore page)
+    'Write a Review': 'Write a Review',
+    'Your Rating': 'Your Rating',
+    'Share your experience...': 'Share your experience...',
+    'Submit Review': 'Submit Review',
+    'reviews.thankYou': 'Thanks for sharing your experience!',
+    'reviews.empty': 'Be the first to leave a review.',
+
+    // Waitlist
+    'waitlist.joinedTitle': "You're on the Waitlist",
+    'waitlist.joinedBody': "We'll let you know as soon as a spot opens up on {date}.",
+
+    // Profile
+    'Personal Details': 'Personal Details',
+    Email: 'Email',
+    Optional: 'Optional',
+    'My Bookings': 'My Bookings',
+
+    // Manager Settings — storefront/branding
+    'Storefront & Branding': 'Storefront & Branding',
+    'Hero Background': 'Hero Background',
+    Logo: 'Logo',
+    'About Text': 'About Text',
+
     // Service & Staff selection
     'Select a Service': 'Select a Service',
     'Choose a Professional': 'Choose a Professional',
     'Any Available': 'Any Available',
     'No Preference': 'No Preference',
     'Any available staff': 'Any available staff',
+    'Continue to Professional': 'Continue to Professional',
     'Continue to Time': 'Continue to Time',
     Total: 'Total',
     min: 'min',
@@ -313,11 +345,38 @@ export const translations = {
     'Book Now': 'הזמינו עכשיו',
     'My Appointments': 'התורים שלי',
 
+    'About Us': 'אודותינו',
+    'about.defaultText':
+      'ברוכים הבאים לסטודיו שלנו - מרחב שנבנה סביב דיוק, תשומת לב אישית ואהבה אמיתית למקצוע. הצוות שלנו משלב מומחיות טכנית עם יחס חם ואישי כך שכל ביקור מרגיש מטופל מההתחלה ועד הסוף.',
+    'Our Work': 'העבודות שלנו',
+    'News & Updates': 'חדשות ועדכונים',
+
+    'Write a Review': 'כתיבת ביקורת',
+    'Your Rating': 'הדירוג שלך',
+    'Share your experience...': 'שתפו את החוויה שלכם...',
+    'Submit Review': 'שליחת ביקורת',
+    'reviews.thankYou': 'תודה ששיתפתם את החוויה שלכם!',
+    'reviews.empty': 'היו הראשונים להשאיר ביקורת.',
+
+    'waitlist.joinedTitle': 'נרשמתם לרשימת ההמתנה',
+    'waitlist.joinedBody': 'נעדכן אתכם ברגע שיתפנה מקום בתאריך {date}.',
+
+    'Personal Details': 'פרטים אישיים',
+    Email: 'אימייל',
+    Optional: 'לא חובה',
+    'My Bookings': 'התורים שלי',
+
+    'Storefront & Branding': 'חזית העסק ומיתוג',
+    'Hero Background': 'תמונת רקע ראשית',
+    Logo: 'לוגו',
+    'About Text': 'טקסט אודות',
+
     'Select a Service': 'בחרו שירות',
     'Choose a Professional': 'בחרו איש מקצוע',
     'Any Available': 'כל הזמין',
     'No Preference': 'ללא העדפה',
     'Any available staff': 'כל איש צוות זמין',
+    'Continue to Professional': 'המשך לבחירת איש מקצוע',
     'Continue to Time': 'המשך לבחירת שעה',
     Total: 'סה"כ',
     min: 'דק׳',
@@ -550,11 +609,38 @@ export const translations = {
     'Book Now': 'احجز الآن',
     'My Appointments': 'مواعيدي',
 
+    'About Us': 'من نحن',
+    'about.defaultText':
+      'مرحبًا بكم في الاستوديو الخاص بنا - مساحة بُنيت على الدقة والعناية والشغف الحقيقي بالمهنة. يجمع فريقنا بين الخبرة الفنية واللمسة الشخصية الدافئة حتى تشعر بأن كل زيارة مدروسة من البداية إلى النهاية.',
+    'Our Work': 'أعمالنا',
+    'News & Updates': 'الأخبار والتحديثات',
+
+    'Write a Review': 'كتابة تقييم',
+    'Your Rating': 'تقييمك',
+    'Share your experience...': 'شارك تجربتك...',
+    'Submit Review': 'إرسال التقييم',
+    'reviews.thankYou': 'شكرًا لمشاركتك تجربتك!',
+    'reviews.empty': 'كن أول من يترك تقييمًا.',
+
+    'waitlist.joinedTitle': 'تم تسجيلك في قائمة الانتظار',
+    'waitlist.joinedBody': 'سنعلمك بمجرد توفر مكان في {date}.',
+
+    'Personal Details': 'البيانات الشخصية',
+    Email: 'البريد الإلكتروني',
+    Optional: 'اختياري',
+    'My Bookings': 'حجوزاتي',
+
+    'Storefront & Branding': 'واجهة المتجر والعلامة التجارية',
+    'Hero Background': 'خلفية الصفحة الرئيسية',
+    Logo: 'الشعار',
+    'About Text': 'نص "من نحن"',
+
     'Select a Service': 'اختر خدمة',
     'Choose a Professional': 'اختر مختصًا',
     'Any Available': 'أي متاح',
     'No Preference': 'بدون تفضيل',
     'Any available staff': 'أي فرد متاح من الطاقم',
+    'Continue to Professional': 'المتابعة لاختيار المختص',
     'Continue to Time': 'المتابعة لاختيار الوقت',
     Total: 'المجموع',
     min: 'د',

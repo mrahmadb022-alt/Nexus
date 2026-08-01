@@ -47,20 +47,20 @@ export default function GalleryStaff() {
         <div className="max-w-container-max mx-auto space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">{t('Staff & Gallery Management')}</h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">{t('Manage your team members and portfolio images.')}</p>
+              <h1 className="font-sans text-display-lg-mobile md:text-display-lg text-on-surface">{t('Staff & Gallery Management')}</h1>
+              <p className="font-sans text-body-lg text-on-surface-variant mt-1">{t('Manage your team members and portfolio images.')}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-surface text-primary border border-outline-variant px-4 py-2.5 rounded-md font-headline-md text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
+                className="bg-surface text-primary border border-outline-variant px-4 py-2.5 rounded-md font-sans text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
               >
                 <Upload size={16} />
                 {t('Add Photos')}
               </button>
               <button
                 onClick={() => setShowAddStaff((s) => !s)}
-                className="bg-primary text-on-primary px-4 py-2.5 rounded-md font-headline-md text-sm hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2"
+                className="bg-primary text-on-primary px-4 py-2.5 rounded-md font-sans text-sm hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2"
               >
                 <Plus size={16} />
                 {t('Add Staff')}
@@ -73,7 +73,7 @@ export default function GalleryStaff() {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <section className="xl:col-span-7 bg-surface rounded-md border border-outline-variant/40 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                <h2 className="font-sans text-headline-md text-on-surface flex items-center gap-2">
                   <IdCard className="text-primary" size={20} />
                   {t('Active Staff')}
                 </h2>
@@ -119,8 +119,8 @@ export default function GalleryStaff() {
                         {member.initials}
                       </div>
                       <div>
-                        <h3 className="font-headline-md text-base text-on-surface">{member.name}</h3>
-                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                        <h3 className="font-sans text-base text-on-surface">{member.name}</h3>
+                        <p className="font-sans text-body-sm text-on-surface-variant">
                           {member.roleKey ? t(member.roleKey) : member.role}
                         </p>
                       </div>
@@ -144,7 +144,7 @@ export default function GalleryStaff() {
 
             <section className="xl:col-span-5 bg-surface rounded-md border border-outline-variant/40 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                <h2 className="font-sans text-headline-md text-on-surface flex items-center gap-2">
                   <Images className="text-primary" size={20} />
                   {t('Portfolio Gallery')}
                 </h2>

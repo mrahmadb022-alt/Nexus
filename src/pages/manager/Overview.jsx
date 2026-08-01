@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BellRing, Armchair, MoreVertical, Hourglass, Check, X, Plus } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData, SERVICES } from '../../context/DataContext'
-import { formatTime, minutesToDuration } from '../../utils/date'
+import { formatDateLong, formatTime, minutesAgoLabel, minutesToDuration } from '../../utils/date'
 import StatusPill from '../../components/StatusPill'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 
@@ -41,14 +41,14 @@ export default function ManagerOverview() {
       <div className="px-margin-mobile lg:px-margin-desktop py-6 max-w-container-max mx-auto w-full flex flex-col gap-8">
         <div className="flex justify-between items-end">
           <div>
-            <h2 className="font-display-lg text-display-lg text-on-background mb-1">{t("Today's Overview")}</h2>
+            <h2 className="font-sans text-display-lg text-on-background mb-1">{t("Today's Overview")}</h2>
             <p className="text-on-surface-variant text-body-lg">
               {todayLabel} • {t('overview.dateAppointments').replace('{count}', todayAppointments.length)}
             </p>
           </div>
           <button
             onClick={() => navigate('/manager/calendar')}
-            className="hidden md:flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-full font-headline-md text-body-sm font-semibold hover:bg-primary-container transition-colors shadow-sm"
+            className="hidden md:flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-full font-sans text-body-sm font-semibold hover:bg-primary-container transition-colors shadow-sm"
           >
             <Plus size={18} />
             {t('New Booking')}
@@ -68,11 +68,11 @@ export default function ManagerOverview() {
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full border-2 border-primary-fixed bg-surface/20 flex items-center justify-center font-headline-md text-headline-md text-on-primary-fixed shrink-0">
+                    <div className="w-16 h-16 rounded-full border-2 border-primary-fixed bg-surface/20 flex items-center justify-center font-sans text-headline-md text-on-primary-fixed shrink-0">
                       {nextUp.initials}
                     </div>
                     <div>
-                      <p className="font-headline-md text-headline-md text-on-primary-fixed">{nextUp.clientName}</p>
+                      <p className="font-sans text-headline-md text-on-primary-fixed">{nextUp.clientName}</p>
                       <p className="text-body-sm text-primary-fixed-dim mt-1">
                         {SERVICES.find((s) => s.id === nextUp.serviceId) ? t(SERVICES.find((s) => s.id === nextUp.serviceId).nameKey) : ''}
                         {' • '}
@@ -94,14 +94,14 @@ export default function ManagerOverview() {
 
             <section className="bg-surface rounded-md border border-outline-variant shadow-sm">
               <div className="px-5 py-4 border-b border-outline-variant flex justify-between items-center">
-                <h3 className="font-headline-md text-headline-md text-on-background">{t('Schedule')}</h3>
+                <h3 className="font-sans text-headline-md text-on-background">{t('Schedule')}</h3>
                 <button onClick={() => navigate('/manager/calendar')} className="text-primary text-body-sm hover:underline">
                   {t('View Calendar')}
                 </button>
               </div>
               <div className="flex flex-col">
                 {todayAppointments.length === 0 && (
-                  <p className="p-6 text-center font-body-sm text-body-sm text-on-surface-variant">{t('No appointments')}</p>
+                  <p className="p-6 text-center font-sans text-body-sm text-on-surface-variant">{t('No appointments')}</p>
                 )}
                 {todayAppointments.map((appt) => {
                   const svc = SERVICES.find((s) => s.id === appt.serviceId)
@@ -150,11 +150,11 @@ export default function ManagerOverview() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
                 <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Revenue Today')}</p>
-                <p className="font-display-lg-mobile text-display-lg-mobile text-on-background">${revenueToday}</p>
+                <p className="font-sans text-display-lg-mobile text-on-background">${revenueToday}</p>
               </div>
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
                 <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Occupancy')}</p>
-                <p className="font-display-lg-mobile text-display-lg-mobile text-on-background">{occupancy}%</p>
+                <p className="font-sans text-display-lg-mobile text-on-background">{occupancy}%</p>
               </div>
             </div>
 
@@ -162,7 +162,7 @@ export default function ManagerOverview() {
               <div className="px-5 py-4 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Hourglass size={20} className="text-on-surface-variant" />
-                  <h3 className="font-headline-md text-[16px] font-semibold text-on-background">{t('Waitlist Requests')}</h3>
+                  <h3 className="font-sans text-[16px] font-semibold text-on-background">{t('Waitlist Requests')}</h3>
                 </div>
                 {waitlist.length > 0 && (
                   <span className="bg-error-container text-on-error-container text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -171,17 +171,18 @@ export default function ManagerOverview() {
                 )}
               </div>
               <div className="p-4 flex flex-col gap-4">
-                {waitlist.length === 0 && <p className="text-center font-body-sm text-body-sm text-on-surface-variant">—</p>}
+                {waitlist.length === 0 && <p className="text-center font-sans text-body-sm text-on-surface-variant">—</p>}
                 {waitlist.map((w) => (
                   <div key={w.id} className="border border-outline-variant/60 rounded-md p-3 bg-surface-bright">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <p className="text-body-sm font-semibold text-on-surface">{w.name}</p>
+                        <p className="text-body-sm font-semibold text-on-surface">{w.clientName}</p>
                         <p className="text-xs text-on-surface-variant">
-                          {t(w.noteKey)} {w.detail}
+                          {formatDateLong(w.date, lang)}
+                          {w.note ? ` • ${w.note}` : ''}
                         </p>
                       </div>
-                      <span className="text-[10px] text-outline">{w.minutesAgo}m</span>
+                      <span className="text-[10px] text-outline">{minutesAgoLabel(w.createdAt)}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
