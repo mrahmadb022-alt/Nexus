@@ -11,11 +11,15 @@ export default function HeroSection() {
 
       <div className="relative z-10 flex flex-col flex-1 p-6 sm:p-8">
         <div className="flex justify-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-surface/90 backdrop-blur-sm shadow-md flex items-center justify-center overflow-hidden p-2 shrink-0">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-surface/90 backdrop-blur-sm shadow-md flex items-center justify-center overflow-hidden p-3 sm:p-4 shrink-0">
             {businessSettings.logoUrl ? (
-              <img src={businessSettings.logoUrl} alt={businessSettings.name} className="max-w-full max-h-full object-contain" />
+              <img
+                src={businessSettings.logoUrl}
+                alt={businessSettings.name}
+                className="w-full h-full object-contain"
+              />
             ) : (
-              <Sparkles className="text-primary" size={28} />
+              <Sparkles className="text-primary" size={36} />
             )}
           </div>
         </div>

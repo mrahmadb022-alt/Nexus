@@ -30,7 +30,10 @@ export default function WelcomeSection() {
             isOpen ? 'bg-success-container text-on-success-container' : 'bg-surface-container-highest text-on-surface-variant'
           }`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-green-600' : 'bg-outline'}`} />
+          <span className="relative flex w-2 h-2">
+            {isOpen && <span className="absolute inset-0 rounded-full bg-green-500 animate-ping" />}
+            <span className={`relative w-2 h-2 rounded-full ${isOpen ? 'bg-green-600' : 'bg-error'}`} />
+          </span>
           {isOpen ? t('Open') : t('Closed')}
         </span>
       </div>
