@@ -244,18 +244,19 @@ export default function DateTimeSelection() {
         </section>
       </main>
 
-      <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-surface-variant px-margin-mobile py-4 z-30 shadow-[0px_-4px_20px_rgba(0,0,0,0.04)]">
-        <div className="max-w-2xl mx-auto flex gap-4">
-          <button
-            disabled={!canContinue}
-            onClick={handleContinue}
-            className="flex-1 py-4 bg-primary text-on-primary rounded-full font-sans text-headline-md hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
-          >
-            {t('Continue')}
-            <ArrowRight size={18} className={isRtl ? 'rtl-mirror' : ''} />
-          </button>
+      {canContinue && (
+        <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-surface-variant px-margin-mobile py-4 z-30 shadow-[0px_-4px_20px_rgba(0,0,0,0.04)]">
+          <div className="max-w-2xl mx-auto flex gap-4">
+            <button
+              onClick={handleContinue}
+              className="flex-1 py-4 bg-primary text-on-primary rounded-full font-sans text-headline-md hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              {t('Continue')}
+              <ArrowRight size={18} className={isRtl ? 'rtl-mirror' : ''} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

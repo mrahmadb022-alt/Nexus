@@ -43,8 +43,8 @@ export default function Landing() {
 
       <main className="flex-grow flex flex-col w-full max-w-container-max mx-auto px-margin-mobile gap-16 py-6 pb-32">
         <HeroSection />
-        <AboutSection />
         <WelcomeSection />
+        <AboutSection />
         {gallery.length > 0 && (
           <section className="flex flex-col gap-6">
             <h2 className="font-sans text-display-lg-mobile text-on-background text-center">{t('Our Work')}</h2>

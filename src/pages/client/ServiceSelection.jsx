@@ -70,28 +70,23 @@ export default function ServiceSelection() {
         </section>
       </main>
 
-      <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
-        <div className="max-w-container-max mx-auto flex justify-between items-center gap-4">
-          <div className="hidden md:block text-on-surface-variant">
-            {selectedService ? (
-              <>
-                <span className="font-bold text-on-background">{t('Total')}:</span> ${selectedService.price.toFixed(2)}{' '}
-                <span className="mx-2">•</span> {minutesToDuration(selectedService.duration, t)}
-              </>
-            ) : (
-              <span className="font-sans text-body-sm">{t('Select a Service')}</span>
-            )}
+      {selectedService && (
+        <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
+          <div className="max-w-container-max mx-auto flex justify-between items-center gap-4">
+            <div className="hidden md:block text-on-surface-variant">
+              <span className="font-bold text-on-background">{t('Total')}:</span> ${selectedService.price.toFixed(2)}{' '}
+              <span className="mx-2">•</span> {minutesToDuration(selectedService.duration, t)}
+            </div>
+            <button
+              onClick={() => navigate('/professional')}
+              className="w-full md:w-auto flex-1 md:flex-none bg-primary text-on-primary h-14 px-8 rounded-full font-sans text-body-lg font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-card-client-lg"
+            >
+              {t('Continue to Professional')}
+              <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />
+            </button>
           </div>
-          <button
-            disabled={!draft.serviceId}
-            onClick={() => navigate('/professional')}
-            className="w-full md:w-auto flex-1 md:flex-none bg-primary text-on-primary h-14 px-8 rounded-full font-sans text-body-lg font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-card-client-lg disabled:opacity-40 disabled:pointer-events-none"
-          >
-            {t('Continue to Professional')}
-            <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />
-          </button>
         </div>
-      </div>
+      )}
     </div>
   )
 }

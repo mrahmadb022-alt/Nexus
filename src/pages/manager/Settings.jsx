@@ -15,14 +15,23 @@ export default function BusinessSettings() {
   const { t, lang, setLang } = useLanguage()
   const { businessSettings, updateBusinessSettings } = useData()
   const [form, setForm] = useState({ ...businessSettings, language: lang })
+  const [saved, setSaved] = useState(false)
   const heroInputRef = useRef(null)
   const logoInputRef = useRef(null)
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }))
 
+  // Image fields apply immediately to shared state (not gated behind Save Changes) —
+  // an upload already reads as a complete action, so it shouldn't need a second step
+  // to actually show up on the client side.
+  const updateImageField = (patch) => {
+    update(patch)
+    updateBusinessSettings(patch)
+  }
+
   const handleFileSelect = (e, field) => {
     const file = e.target.files?.[0]
-    if (file) update({ [field]: URL.createObjectURL(file) })
+    if (file) updateImageField({ [field]: URL.createObjectURL(file) })
     e.target.value = ''
   }
 
@@ -30,6 +39,8 @@ export default function BusinessSettings() {
     const { language, ...rest } = form
     updateBusinessSettings(rest)
     setLang(language)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   const handleCancel = () => setForm({ ...businessSettings, language: lang })
@@ -126,7 +137,7 @@ export default function BusinessSettings() {
                       <Upload size={14} /> {t('Upload')}
                     </button>
                     {form.logoUrl && (
-                      <button onClick={() => update({ logoUrl: null })} className="btn-ghost px-3 py-2 text-sm">
+                      <button onClick={() => updateImageField({ logoUrl: null })} className="btn-ghost px-3 py-2 text-sm">
                         {t('Remove')}
                       </button>
                     )}
@@ -178,7 +189,8 @@ export default function BusinessSettings() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant/30">
+            <div className="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant/30">
+              {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}
               <button onClick={handleCancel} className="px-6 py-3 rounded-md font-sans text-headline-md text-primary border border-outline-variant hover:bg-surface-container-high transition-colors">
                 {t('Cancel')}
               </button>

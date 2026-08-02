@@ -93,17 +93,19 @@ export default function StaffSelection() {
         </section>
       </main>
 
-      <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
-        <div className="max-w-container-max mx-auto flex justify-end items-center gap-4">
-          <button
-            onClick={() => navigate('/datetime')}
-            className="w-full md:w-auto flex-1 md:flex-none bg-primary text-on-primary h-14 px-8 rounded-full font-sans text-body-lg font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-card-client-lg"
-          >
-            {t('Continue to Time')}
-            <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />
-          </button>
+      {draft.staffId !== undefined && (
+        <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
+          <div className="max-w-container-max mx-auto flex justify-end items-center gap-4">
+            <button
+              onClick={() => navigate('/datetime')}
+              className="w-full md:w-auto flex-1 md:flex-none bg-primary text-on-primary h-14 px-8 rounded-full font-sans text-body-lg font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-card-client-lg"
+            >
+              {t('Continue to Time')}
+              <ArrowRight size={20} className={isRtl ? 'rtl-mirror' : ''} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

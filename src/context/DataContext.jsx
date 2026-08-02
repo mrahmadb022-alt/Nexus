@@ -232,13 +232,15 @@ export function DataProvider({ children }) {
   const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
   const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
 
-  // Booking draft (multi-step client flow)
-  const [draft, setDraft] = useState({ serviceId: null, staffId: null, date: null, time: null })
+  // Booking draft (multi-step client flow). staffId starts `undefined` (not yet
+  // touched) rather than `null`, since `null` is itself a valid explicit choice
+  // ("Any Available" / "No Preference") that the Continue button needs to unlock.
+  const [draft, setDraft] = useState({ serviceId: null, staffId: undefined, date: null, time: null })
 
   const setDraftService = (serviceId) => setDraft((d) => ({ ...d, serviceId }))
   const setDraftStaff = (staffId) => setDraft((d) => ({ ...d, staffId }))
   const setDraftDateTime = (date, time) => setDraft((d) => ({ ...d, date, time }))
-  const resetDraft = () => setDraft({ serviceId: null, staffId: null, date: null, time: null })
+  const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null })
 
   const confirmDraftBooking = () => {
     const newAppt = {
