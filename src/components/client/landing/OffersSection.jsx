@@ -23,9 +23,11 @@ export default function OffersSection() {
             </div>
             <div className="min-w-0">
               <h3 className="font-sans text-[16px] text-on-background truncate">{offer.titleKey ? t(offer.titleKey) : offer.title}</h3>
-              <p className="font-mono text-[12px] text-on-surface-variant">
-                {t('Code:')} {offer.code}
-              </p>
+              {(offer.descriptionKey || offer.description) && (
+                <p className="font-sans text-[13px] text-on-surface-variant line-clamp-2">
+                  {offer.descriptionKey ? t(offer.descriptionKey) : offer.description}
+                </p>
+              )}
             </div>
           </div>
         ))}

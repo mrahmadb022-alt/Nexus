@@ -11,7 +11,7 @@ export default function Marketing() {
   const [showAnnForm, setShowAnnForm] = useState(false)
   const [showOfferForm, setShowOfferForm] = useState(false)
   const [annDraft, setAnnDraft] = useState({ title: '', body: '' })
-  const [offerDraft, setOfferDraft] = useState({ title: '', code: '', discountLabel: '' })
+  const [offerDraft, setOfferDraft] = useState({ title: '', description: '', discountLabel: '' })
 
   const todayIso = new Date().toISOString().slice(0, 10)
 
@@ -23,9 +23,16 @@ export default function Marketing() {
   }
 
   const saveOffer = () => {
-    if (!offerDraft.title.trim() || !offerDraft.code.trim()) return
-    addOffer({ titleKey: null, title: offerDraft.title, code: offerDraft.code.toUpperCase(), discountLabel: offerDraft.discountLabel || '—', expiresLabel: null })
-    setOfferDraft({ title: '', code: '', discountLabel: '' })
+    if (!offerDraft.title.trim()) return
+    addOffer({
+      titleKey: null,
+      title: offerDraft.title,
+      descriptionKey: null,
+      description: offerDraft.description,
+      discountLabel: offerDraft.discountLabel || '—',
+      expiresLabel: null,
+    })
+    setOfferDraft({ title: '', description: '', discountLabel: '' })
     setShowOfferForm(false)
   }
 
@@ -153,17 +160,18 @@ export default function Marketing() {
                   className="input-field"
                 />
                 <div className="flex gap-2">
-                  <input
-                    placeholder={t('Code:')}
-                    value={offerDraft.code}
-                    onChange={(e) => setOfferDraft((s) => ({ ...s, code: e.target.value }))}
-                    className="input-field flex-1"
+                  <textarea
+                    rows={2}
+                    placeholder={t('Description')}
+                    value={offerDraft.description}
+                    onChange={(e) => setOfferDraft((s) => ({ ...s, description: e.target.value }))}
+                    className="input-field flex-1 resize-none"
                   />
                   <input
                     placeholder="15%"
                     value={offerDraft.discountLabel}
                     onChange={(e) => setOfferDraft((s) => ({ ...s, discountLabel: e.target.value }))}
-                    className="input-field w-24"
+                    className="input-field w-24 self-start"
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
@@ -188,13 +196,15 @@ export default function Marketing() {
                     >
                       <span className="font-sans text-headline-md">{offer.discountLabel}</span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h4 className={`font-sans text-[15px] ${offer.active ? 'text-on-background' : 'text-on-surface-variant'}`}>
                         {offer.titleKey ? t(offer.titleKey) : offer.title}
                       </h4>
-                      <p className="font-mono text-[12px] text-on-surface-variant">
-                        {t('Code:')} {offer.code}
-                      </p>
+                      {(offer.descriptionKey || offer.description) && (
+                        <p className="font-sans text-[12px] text-on-surface-variant line-clamp-1">
+                          {offer.descriptionKey ? t(offer.descriptionKey) : offer.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <label className="relative inline-block w-10 h-6 cursor-pointer shrink-0">

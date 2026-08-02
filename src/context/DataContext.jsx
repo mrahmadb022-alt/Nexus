@@ -116,9 +116,9 @@ const INITIAL_ANNOUNCEMENTS = [
 ]
 
 const INITIAL_OFFERS = [
-  { id: 'o1', titleKey: 'offer.welcome.title', code: 'WELCOME15', discountLabel: '15%', active: true, expiresLabel: iso(60) },
-  { id: 'o2', titleKey: 'offer.fall.title', code: 'FALL20', discountLabel: '$20', active: false, expiresLabel: iso(-5) },
-  { id: 'o3', titleKey: 'offer.referral.title', code: 'FRIEND10', discountLabel: '10%', active: true, expiresLabel: iso(90) },
+  { id: 'o1', titleKey: 'offer.welcome.title', descriptionKey: 'offer.welcome.desc', discountLabel: '15%', active: true, expiresLabel: iso(60) },
+  { id: 'o2', titleKey: 'offer.fall.title', descriptionKey: 'offer.fall.desc', discountLabel: '$20', active: false, expiresLabel: iso(-5) },
+  { id: 'o3', titleKey: 'offer.referral.title', descriptionKey: 'offer.referral.desc', discountLabel: '10%', active: true, expiresLabel: iso(90) },
 ]
 
 const INITIAL_APPOINTMENTS = [

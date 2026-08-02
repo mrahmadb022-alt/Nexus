@@ -253,7 +253,7 @@ export const translations = {
     'Scheduled:': 'Scheduled:',
     'Published:': 'Published:',
     'Promotional Offers': 'Promotional Offers',
-    'Code:': 'Code:',
+    Description: 'Description',
     'Expired:': 'Expired:',
     'Email Blast': 'Email Blast',
     Active: 'Active',
@@ -269,8 +269,11 @@ export const translations = {
     'ann.renovation.title': 'Studio Refresh Complete',
     'ann.renovation.body': "Our studio has a fresh new look. Come see the upgraded stations and lounge area.",
     'offer.welcome.title': 'First Time Client',
+    'offer.welcome.desc': 'Save on your very first visit with us — valid on any service.',
     'offer.fall.title': 'Fall Special Color',
+    'offer.fall.desc': 'A limited-time discount on full color and balayage services this season.',
     'offer.referral.title': 'Refer a Friend',
+    'offer.referral.desc': 'Bring a friend along and you both save on your next appointment.',
 
     // Business Settings
     'Business Settings': 'Business Settings',
@@ -525,7 +528,7 @@ export const translations = {
     'Scheduled:': 'מתוזמן:',
     'Published:': 'פורסם:',
     'Promotional Offers': 'מבצעים',
-    'Code:': 'קוד:',
+    Description: 'תיאור',
     'Expired:': 'פג תוקף:',
     'Email Blast': 'דיוור אימייל',
     Active: 'פעיל',
@@ -538,8 +541,11 @@ export const translations = {
     'ann.renovation.title': 'השיפוץ בסטודיו הושלם',
     'ann.renovation.body': 'לסטודיו שלנו יש מראה חדש ורענן. בואו לראות את העמדות המשודרגות ואזור ההמתנה.',
     'offer.welcome.title': 'לקוח חדש',
+    'offer.welcome.desc': 'חסכו בביקור הראשון שלכם אצלנו - בתוקף לכל שירות.',
     'offer.fall.title': 'מבצע צבע סתיו',
+    'offer.fall.desc': 'הנחה לזמן מוגבל על שירותי צביעה מלאה ובלאיאז׳ בעונה זו.',
     'offer.referral.title': 'הפנה חבר',
+    'offer.referral.desc': 'הביאו חבר או חברה ושניכם תחסכו בתור הבא שלכם.',
 
     'Business Settings': 'הגדרות עסק',
     'Manage your business profile, operating hours, and general preferences.':
@@ -792,7 +798,7 @@ export const translations = {
     'Scheduled:': 'مجدول:',
     'Published:': 'نُشر:',
     'Promotional Offers': 'العروض الترويجية',
-    'Code:': 'الرمز:',
+    Description: 'الوصف',
     'Expired:': 'انتهى:',
     'Email Blast': 'بريد إلكتروني جماعي',
     Active: 'نشط',
@@ -805,8 +811,11 @@ export const translations = {
     'ann.renovation.title': 'اكتمل تجديد الاستوديو',
     'ann.renovation.body': 'حصل الاستوديو لدينا على مظهر جديد ومنعش. تعال لرؤية المحطات المطورة وصالة الانتظار.',
     'offer.welcome.title': 'عميل جديد',
+    'offer.welcome.desc': 'وفّر في زيارتك الأولى معنا - يسري على أي خدمة.',
     'offer.fall.title': 'عرض صبغة الخريف',
+    'offer.fall.desc': 'خصم لفترة محدودة على خدمات الصبغة الكاملة والبالياج هذا الموسم.',
     'offer.referral.title': 'أحضر صديقًا',
+    'offer.referral.desc': 'أحضر صديقًا معك ويحصل كلاكما على خصم في موعدكما القادم.',
 
     'Business Settings': 'إعدادات العمل',
     'Manage your business profile, operating hours, and general preferences.':
