@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarClock, XCircle, Scissors, User } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
-import { useData, SERVICES, MOCK_CLIENT_ID } from '../../context/DataContext'
+import { useData, serviceName, MOCK_CLIENT_ID } from '../../context/DataContext'
 import { formatDateLong, formatTime } from '../../utils/date'
 import StatusPill from '../../components/StatusPill'
 import RescheduleModal from '../../components/client/RescheduleModal'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 
 export default function Profile() {
   const { t, lang } = useLanguage()
@@ -21,10 +22,12 @@ export default function Profile() {
     setDraftStaff,
     clientProfile,
     updateClientProfile,
+    services,
   } = useData()
   const [rescheduling, setRescheduling] = useState(null)
   const [form, setForm] = useState(clientProfile)
   const [saved, setSaved] = useState(false)
+  const [savingProfile, guardProfileSave] = useSubmitGuard()
 
   useEffect(() => {
     if (location.hash === '#appointments') {
@@ -48,11 +51,11 @@ export default function Profile() {
     navigate('/datetime')
   }
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = guardProfileSave(() => {
     updateClientProfile(form)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-  }
+  })
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
@@ -99,7 +102,7 @@ export default function Profile() {
           </div>
           <div className="flex items-center gap-3 justify-end">
             {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}
-            <button onClick={handleSaveProfile} className="btn-primary px-6 py-2.5">
+            <button onClick={handleSaveProfile} disabled={savingProfile} className="btn-primary px-6 py-2.5 disabled:opacity-60 disabled:pointer-events-none">
               {t('Save Changes')}
             </button>
           </div>
@@ -117,7 +120,7 @@ export default function Profile() {
               </div>
             )}
             {upcoming.map((appt) => {
-              const service = SERVICES.find((s) => s.id === appt.serviceId)
+              const service = services.find((s) => s.id === appt.serviceId)
               const staff = appt.staffId ? getStaffById(appt.staffId) : null
               return (
                 <div key={appt.id} className="card-client p-5 flex flex-col gap-4 transition-all hover:shadow-card-client-lg">
@@ -127,7 +130,7 @@ export default function Profile() {
                         <Scissors size={20} />
                       </div>
                       <div>
-                        <h4 className="font-sans text-[18px] text-on-background">{service ? t(service.nameKey) : ''}</h4>
+                        <h4 className="font-sans text-[18px] text-on-background">{serviceName(service, t)}</h4>
                         <p className="font-sans text-body-sm text-on-surface-variant">
                           {formatDateLong(appt.date, lang)} • {formatTime(appt.time, lang)}
                           {staff ? ` • ${staff.name}` : ''}
@@ -159,7 +162,7 @@ export default function Profile() {
             <h3 className="font-mono text-label-caps text-on-surface-variant mb-2 uppercase">{t('Past')}</h3>
             {past.length === 0 && <p className="font-sans text-body-sm text-on-surface-variant">{t('No past appointments')}</p>}
             {past.map((appt) => {
-              const service = SERVICES.find((s) => s.id === appt.serviceId)
+              const service = services.find((s) => s.id === appt.serviceId)
               return (
                 <div
                   key={appt.id}
@@ -170,7 +173,7 @@ export default function Profile() {
                       <Scissors size={18} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-sans text-[16px] text-on-background truncate">{service ? t(service.nameKey) : ''}</h4>
+                      <h4 className="font-sans text-[16px] text-on-background truncate">{serviceName(service, t)}</h4>
                       <p className="font-sans text-body-sm text-on-surface-variant">{formatDateLong(appt.date, lang)}</p>
                     </div>
                   </div>

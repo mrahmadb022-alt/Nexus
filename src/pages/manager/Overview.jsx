@@ -1,16 +1,18 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BellRing, Armchair, MoreVertical, Hourglass, Check, X, Plus } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
-import { useData, SERVICES } from '../../context/DataContext'
+import { useData, serviceName } from '../../context/DataContext'
 import { formatDateLong, formatTime, minutesAgoLabel, minutesToDuration } from '../../utils/date'
 import StatusPill from '../../components/StatusPill'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
+import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
 
 export default function ManagerOverview() {
   const { t, lang } = useLanguage()
   const navigate = useNavigate()
-  const { appointments, waitlist, approveWaitlist, declineWaitlist } = useData()
+  const { appointments, waitlist, approveWaitlist, declineWaitlist, updateAppointmentStatus, services } = useData()
+  const [detailsAppt, setDetailsAppt] = useState(null)
 
   const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const todayLabel = useMemo(
@@ -29,11 +31,11 @@ export default function ManagerOverview() {
   const nextUp = todayAppointments.find((a) => a.status === 'in-service') || todayAppointments.find((a) => a.status !== 'completed')
 
   const revenueToday = todayAppointments.reduce((sum, a) => {
-    const svc = SERVICES.find((s) => s.id === a.serviceId)
+    const svc = services.find((s) => s.id === a.serviceId)
     return a.status === 'cancelled' ? sum : sum + (svc?.price || 0)
   }, 0)
 
-  const occupancy = Math.min(100, Math.round((todayAppointments.length / 8) * 100))
+  const clientsToday = new Set(todayAppointments.map((a) => a.clientId)).size
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -42,9 +44,7 @@ export default function ManagerOverview() {
         <div className="flex justify-between items-end">
           <div>
             <h2 className="font-sans text-display-lg text-on-background mb-1">{t("Today's Overview")}</h2>
-            <p className="text-on-surface-variant text-body-lg">
-              {todayLabel} • {t('overview.dateAppointments').replace('{count}', todayAppointments.length)}
-            </p>
+            <p className="text-on-surface-variant text-body-lg">{todayLabel}</p>
           </div>
           <button
             onClick={() => navigate('/manager/calendar')}
@@ -68,25 +68,33 @@ export default function ManagerOverview() {
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full border-2 border-primary-fixed bg-surface/20 flex items-center justify-center font-sans text-headline-md text-on-primary-fixed shrink-0">
+                    <div className="w-16 h-16 rounded-full border-2 border-primary-fixed bg-surface/20 flex items-center justify-center font-sans text-headline-md text-on-primary-container shrink-0">
                       {nextUp.initials}
                     </div>
                     <div>
-                      <p className="font-sans text-headline-md text-on-primary-fixed">{nextUp.clientName}</p>
+                      <p className="font-sans text-headline-md text-on-primary-container">{nextUp.clientName}</p>
                       <p className="text-body-sm text-primary-fixed-dim mt-1">
-                        {SERVICES.find((s) => s.id === nextUp.serviceId) ? t(SERVICES.find((s) => s.id === nextUp.serviceId).nameKey) : ''}
+                        {serviceName(services.find((s) => s.id === nextUp.serviceId), t)}
                         {' • '}
                         {formatTime(nextUp.time, lang)}
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none bg-surface/10 hover:bg-surface/20 text-on-primary-fixed px-4 py-2 rounded-md text-body-sm transition-colors border border-surface/20">
+                    <button
+                      onClick={() => setDetailsAppt(nextUp)}
+                      className="flex-1 sm:flex-none bg-surface/10 hover:bg-surface/20 text-on-primary-container px-4 py-2 rounded-md text-body-sm transition-colors border border-surface/20"
+                    >
                       {t('Details')}
                     </button>
-                    <button className="flex-1 sm:flex-none bg-inverse-primary text-on-primary-fixed px-4 py-2 rounded-md text-body-sm font-semibold hover:bg-primary-fixed transition-colors">
-                      {t('Check In')}
-                    </button>
+                    {nextUp.status !== 'in-service' && (
+                      <button
+                        onClick={() => updateAppointmentStatus(nextUp.id, 'in-service')}
+                        className="flex-1 sm:flex-none bg-inverse-primary text-on-primary-fixed px-4 py-2 rounded-md text-body-sm font-semibold hover:bg-primary-fixed transition-colors"
+                      >
+                        {t('Check In')}
+                      </button>
+                    )}
                   </div>
                 </div>
               </section>
@@ -104,7 +112,7 @@ export default function ManagerOverview() {
                   <p className="p-6 text-center font-sans text-body-sm text-on-surface-variant">{t('No appointments')}</p>
                 )}
                 {todayAppointments.map((appt) => {
-                  const svc = SERVICES.find((s) => s.id === appt.serviceId)
+                  const svc = services.find((s) => s.id === appt.serviceId)
                   const [h, m] = appt.time.split(':')
                   const active = appt.status === 'in-service'
                   return (
@@ -128,13 +136,17 @@ export default function ManagerOverview() {
                           <div>
                             <p className="text-body-sm font-semibold text-on-surface">{appt.clientName}</p>
                             <p className="text-xs text-on-surface-variant mt-0.5">
-                              {svc ? t(svc.nameKey) : ''} • {svc ? minutesToDuration(svc.duration, t) : ''}
+                              {serviceName(svc, t)} • {svc ? minutesToDuration(svc.duration, t) : ''}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <StatusPill status={appt.status} />
-                          <button className="text-outline hover:text-primary transition-colors">
+                          <button
+                            onClick={() => setDetailsAppt(appt)}
+                            aria-label={t('Details')}
+                            className="text-outline hover:text-primary transition-colors"
+                          >
                             <MoreVertical size={18} />
                           </button>
                         </div>
@@ -150,11 +162,11 @@ export default function ManagerOverview() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
                 <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Revenue Today')}</p>
-                <p className="font-sans text-display-lg-mobile text-on-background">${revenueToday}</p>
+                <p className="font-sans text-display-lg-mobile text-on-background">₪{revenueToday}</p>
               </div>
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
-                <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Occupancy')}</p>
-                <p className="font-sans text-display-lg-mobile text-on-background">{occupancy}%</p>
+                <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Clients Today')}</p>
+                <p className="font-sans text-display-lg-mobile text-on-background">{clientsToday}</p>
               </div>
             </div>
 
@@ -205,6 +217,7 @@ export default function ManagerOverview() {
           </div>
         </div>
       </div>
+      {detailsAppt && <AppointmentDetailsModal appointment={detailsAppt} onClose={() => setDetailsAppt(null)} />}
     </div>
   )
 }

@@ -8,7 +8,7 @@ const LINKS = [
   { to: '/manager', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/manager/calendar', icon: CalendarDays, label: 'Schedule' },
   { to: '/manager/staff', icon: IdCard, label: 'Staff' },
-  { to: '/manager/marketing', icon: Megaphone, label: 'Marketing' },
+  { to: '/manager/public-page', icon: Megaphone, label: 'Public Page' },
   { to: '/manager/settings', icon: Settings, label: 'Settings' },
 ]
 
@@ -19,8 +19,10 @@ export default function ManagerSidebar() {
 
   return (
     <nav className="hidden lg:flex flex-col h-screen sticky top-0 start-0 z-40 py-6 w-72 border-e border-outline-variant bg-surface shrink-0">
-      <div className="px-6 py-2 flex items-center justify-between mb-6">
-        <span className="font-sans text-display-lg-mobile text-primary">{t('Nexus Booking')}</span>
+      <div className="px-6 py-2 flex items-center justify-between gap-2 mb-6">
+        <span className="font-sans text-display-lg-mobile text-primary truncate min-w-0" title={businessSettings.name || t('Nexus Booking')}>
+          {businessSettings.name || t('Nexus Booking')}
+        </span>
         <LanguageSwitcher />
       </div>
       <div className="px-6 mb-8 flex items-center gap-4">

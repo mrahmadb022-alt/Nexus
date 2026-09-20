@@ -6,7 +6,7 @@ const TABS = [
   { to: '/manager', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/manager/calendar', icon: CalendarDays, label: 'Schedule' },
   { to: '/manager/staff', icon: IdCard, label: 'Staff' },
-  { to: '/manager/marketing', icon: Megaphone, label: 'Marketing' },
+  { to: '/manager/public-page', icon: Megaphone, label: 'Public Page' },
   { to: '/manager/settings', icon: Settings, label: 'Settings' },
 ]
 

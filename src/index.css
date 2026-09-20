@@ -4,6 +4,290 @@
 
 :root {
   --font-sans: 'Manrope', system-ui, sans-serif;
+
+  /* Theme tokens — "Classic" (default). Values are space-separated R G B components
+     (no rgb()/commas) so tailwind.config.js can compose them as rgb(var(--x) / <alpha-value>),
+     which keeps opacity modifiers like bg-primary/40 working. These are the exact colors the
+     app shipped with, converted from hex, so the default look is unchanged by this system. */
+  --color-surface: 249 249 255;
+  --color-surface-dim: 207 218 242;
+  --color-surface-bright: 249 249 255;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 240 243 255;
+  --color-surface-container: 231 238 255;
+  --color-surface-container-high: 222 232 255;
+  --color-surface-container-highest: 216 227 251;
+  --color-on-surface: 17 28 45;
+  --color-on-surface-variant: 64 72 75;
+  --color-inverse-surface: 38 49 67;
+  --color-inverse-on-surface: 236 241 255;
+  --color-outline: 112 120 124;
+  --color-outline-variant: 192 200 203;
+  --color-surface-tint: 48 101 118;
+  --color-primary: 0 52 65;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 15 76 92;
+  --color-on-primary-container: 135 187 206;
+  --color-inverse-primary: 154 206 225;
+  --color-secondary: 80 95 118;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 208 225 251;
+  --color-on-secondary-container: 84 100 122;
+  --color-tertiary: 44 48 50;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 67 70 72;
+  --color-on-tertiary-container: 177 180 182;
+  --color-primary-fixed: 182 235 254;
+  --color-primary-fixed-dim: 154 206 225;
+  --color-on-primary-fixed: 0 31 40;
+  --color-on-primary-fixed-variant: 17 77 93;
+  --color-secondary-fixed: 211 228 254;
+  --color-secondary-fixed-dim: 183 200 225;
+  --color-on-secondary-fixed: 11 28 48;
+  --color-on-secondary-fixed-variant: 56 72 93;
+  --color-tertiary-fixed: 224 227 229;
+  --color-tertiary-fixed-dim: 196 199 201;
+  --color-on-tertiary-fixed: 25 28 30;
+  --color-on-tertiary-fixed-variant: 68 71 73;
+  --color-background: 249 249 255;
+  --color-on-background: 17 28 45;
+  --color-surface-variant: 216 227 251;
+}
+
+/* "Blush" — soft/feminine preset: light pink + white, deep rose primary, soft gold secondary. */
+[data-theme='blush'] {
+  --color-surface: 255 248 250;
+  --color-surface-dim: 232 198 209;
+  --color-surface-bright: 255 248 250;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 253 238 243;
+  --color-surface-container: 251 227 236;
+  --color-surface-container-high: 246 214 227;
+  --color-surface-container-highest: 240 199 216;
+  --color-on-surface: 61 37 48;
+  --color-on-surface-variant: 122 92 104;
+  --color-inverse-surface: 61 37 48;
+  --color-inverse-on-surface: 251 227 236;
+  --color-outline: 156 120 133;
+  --color-outline-variant: 227 195 206;
+  --color-surface-tint: 166 72 106;
+  --color-primary: 166 68 107;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 245 199 216;
+  --color-on-primary-container: 92 32 56;
+  --color-inverse-primary: 122 46 76;
+  --color-secondary: 138 109 62;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 243 227 195;
+  --color-on-secondary-container: 92 74 38;
+  --color-tertiary: 92 64 72;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 232 211 217;
+  --color-on-tertiary-container: 74 46 54;
+  --color-primary-fixed: 248 214 227;
+  --color-primary-fixed-dim: 235 175 199;
+  --color-on-primary-fixed: 61 14 34;
+  --color-on-primary-fixed-variant: 122 46 76;
+  --color-secondary-fixed: 243 227 195;
+  --color-secondary-fixed-dim: 222 196 143;
+  --color-on-secondary-fixed: 61 47 20;
+  --color-on-secondary-fixed-variant: 92 74 38;
+  --color-tertiary-fixed: 232 211 217;
+  --color-tertiary-fixed-dim: 203 169 178;
+  --color-on-tertiary-fixed: 46 24 32;
+  --color-on-tertiary-fixed-variant: 74 46 54;
+  --color-background: 255 248 250;
+  --color-on-background: 61 37 48;
+  --color-surface-variant: 246 214 227;
+}
+
+/* "Onyx" — bold/masculine preset: dark charcoal, muted teal primary, steel-grey secondary. */
+[data-theme='onyx'] {
+  --color-surface: 23 24 26;
+  --color-surface-dim: 16 17 18;
+  --color-surface-bright: 61 64 67;
+  --color-surface-container-lowest: 13 14 15;
+  --color-surface-container-low: 31 33 35;
+  --color-surface-container: 36 39 42;
+  --color-surface-container-high: 47 49 52;
+  --color-surface-container-highest: 57 60 63;
+  --color-on-surface: 227 226 230;
+  --color-on-surface-variant: 167 171 176;
+  --color-inverse-surface: 15 16 18;
+  --color-inverse-on-surface: 236 235 239;
+  --color-outline: 110 114 119;
+  --color-outline-variant: 62 65 69;
+  --color-surface-tint: 79 168 160;
+  --color-primary: 79 168 160;
+  --color-on-primary: 10 35 32;
+  --color-primary-container: 28 74 69;
+  --color-on-primary-container: 168 222 215;
+  --color-inverse-primary: 143 212 204;
+  --color-secondary: 139 149 163;
+  --color-on-secondary: 22 25 29;
+  --color-secondary-container: 46 53 64;
+  --color-on-secondary-container: 199 208 220;
+  --color-tertiary: 168 162 155;
+  --color-on-tertiary: 23 20 15;
+  --color-tertiary-container: 55 51 44;
+  --color-on-tertiary-container: 219 213 203;
+  --color-primary-fixed: 197 234 229;
+  --color-primary-fixed-dim: 143 212 204;
+  --color-on-primary-fixed: 6 33 30;
+  --color-on-primary-fixed-variant: 28 74 69;
+  --color-secondary-fixed: 217 222 230;
+  --color-secondary-fixed-dim: 181 190 201;
+  --color-on-secondary-fixed: 18 22 27;
+  --color-on-secondary-fixed-variant: 46 53 64;
+  --color-tertiary-fixed: 229 223 213;
+  --color-tertiary-fixed-dim: 199 193 183;
+  --color-on-tertiary-fixed: 30 27 21;
+  --color-on-tertiary-fixed-variant: 55 51 44;
+  --color-background: 23 24 26;
+  --color-on-background: 227 226 230;
+  --color-surface-variant: 57 60 63;
+}
+
+/* "Sand" — gender-neutral preset: warm beige/cream, muted terracotta primary, sage secondary. */
+[data-theme='sand'] {
+  --color-surface: 251 246 239;
+  --color-surface-dim: 227 214 194;
+  --color-surface-bright: 251 246 239;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 246 238 224;
+  --color-surface-container: 241 229 210;
+  --color-surface-container-high: 235 220 196;
+  --color-surface-container-highest: 227 210 181;
+  --color-on-surface: 54 46 36;
+  --color-on-surface-variant: 107 93 74;
+  --color-inverse-surface: 54 46 36;
+  --color-inverse-on-surface: 246 238 224;
+  --color-outline: 140 122 97;
+  --color-outline-variant: 214 198 168;
+  --color-surface-tint: 181 103 58;
+  --color-primary: 181 103 58;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 240 211 188;
+  --color-on-primary-container: 107 54 22;
+  --color-inverse-primary: 138 74 38;
+  --color-secondary: 110 112 72;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 228 230 198;
+  --color-on-secondary-container: 69 71 38;
+  --color-tertiary: 111 93 78;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 232 218 203;
+  --color-on-tertiary-container: 74 58 44;
+  --color-primary-fixed: 245 223 201;
+  --color-primary-fixed-dim: 224 180 140;
+  --color-on-primary-fixed: 61 29 8;
+  --color-on-primary-fixed-variant: 138 74 38;
+  --color-secondary-fixed: 228 230 198;
+  --color-secondary-fixed-dim: 199 202 160;
+  --color-on-secondary-fixed: 41 43 15;
+  --color-on-secondary-fixed-variant: 69 71 38;
+  --color-tertiary-fixed: 232 218 203;
+  --color-tertiary-fixed-dim: 203 184 163;
+  --color-on-tertiary-fixed: 46 33 21;
+  --color-on-tertiary-fixed-variant: 74 58 44;
+  --color-background: 251 246 239;
+  --color-on-background: 54 46 36;
+  --color-surface-variant: 227 210 181;
+}
+
+/* "Americana" — crisp red, white & blue preset: deep navy primary, bold red secondary accent. */
+[data-theme='americana'] {
+  --color-surface: 250 251 255;
+  --color-surface-dim: 201 214 236;
+  --color-surface-bright: 250 251 255;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 239 243 252;
+  --color-surface-container: 227 234 250;
+  --color-surface-container-high: 215 225 247;
+  --color-surface-container-highest: 201 214 242;
+  --color-on-surface: 16 25 46;
+  --color-on-surface-variant: 71 81 107;
+  --color-inverse-surface: 16 25 46;
+  --color-inverse-on-surface: 239 243 252;
+  --color-outline: 110 120 144;
+  --color-outline-variant: 192 202 221;
+  --color-surface-tint: 30 58 138;
+  --color-primary: 30 58 138;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 201 214 247;
+  --color-on-primary-container: 18 36 92;
+  --color-inverse-primary: 22 41 122;
+  --color-secondary: 185 28 28;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 249 212 212;
+  --color-on-secondary-container: 122 18 18;
+  --color-tertiary: 68 80 102;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 220 227 240;
+  --color-on-tertiary-container: 42 51 71;
+  --color-primary-fixed: 215 225 252;
+  --color-primary-fixed-dim: 168 188 238;
+  --color-on-primary-fixed: 11 22 64;
+  --color-on-primary-fixed-variant: 22 41 122;
+  --color-secondary-fixed: 249 212 212;
+  --color-secondary-fixed-dim: 239 163 163;
+  --color-on-secondary-fixed: 77 10 10;
+  --color-on-secondary-fixed-variant: 122 18 18;
+  --color-tertiary-fixed: 220 227 240;
+  --color-tertiary-fixed-dim: 185 196 218;
+  --color-on-tertiary-fixed: 26 33 51;
+  --color-on-tertiary-fixed-variant: 42 51 71;
+  --color-background: 250 251 255;
+  --color-on-background: 16 25 46;
+  --color-surface-variant: 201 214 242;
+}
+
+/* "Noir Gold" — black & gold preset: near-black surfaces, gold primary, muted bronze secondary
+   (kept as a separate, less saturated accent so gold doesn't get overused as the only color). */
+[data-theme='noir-gold'] {
+  --color-surface: 14 13 10;
+  --color-surface-dim: 8 7 5;
+  --color-surface-bright: 50 45 34;
+  --color-surface-container-lowest: 5 4 3;
+  --color-surface-container-low: 26 23 18;
+  --color-surface-container: 33 29 22;
+  --color-surface-container-high: 42 37 27;
+  --color-surface-container-highest: 52 46 33;
+  --color-on-surface: 240 230 210;
+  --color-on-surface-variant: 184 172 147;
+  --color-inverse-surface: 5 4 3;
+  --color-inverse-on-surface: 245 237 220;
+  --color-outline: 138 125 99;
+  --color-outline-variant: 58 51 31;
+  --color-surface-tint: 201 162 39;
+  --color-primary: 201 162 39;
+  --color-on-primary: 20 17 10;
+  --color-primary-container: 61 50 18;
+  --color-on-primary-container: 233 206 122;
+  --color-inverse-primary: 233 206 122;
+  --color-secondary: 160 143 110;
+  --color-on-secondary: 20 18 12;
+  --color-secondary-container: 51 44 30;
+  --color-on-secondary-container: 216 201 169;
+  --color-tertiary: 156 148 138;
+  --color-on-tertiary: 22 19 15;
+  --color-tertiary-container: 50 45 39;
+  --color-on-tertiary-container: 214 207 197;
+  --color-primary-fixed: 243 226 174;
+  --color-primary-fixed-dim: 217 188 106;
+  --color-on-primary-fixed: 36 29 6;
+  --color-on-primary-fixed-variant: 61 50 18;
+  --color-secondary-fixed: 228 216 188;
+  --color-secondary-fixed-dim: 194 177 138;
+  --color-on-secondary-fixed: 33 28 16;
+  --color-on-secondary-fixed-variant: 51 44 30;
+  --color-tertiary-fixed: 222 215 205;
+  --color-tertiary-fixed-dim: 191 182 169;
+  --color-on-tertiary-fixed: 29 26 21;
+  --color-on-tertiary-fixed-variant: 50 45 39;
+  --color-background: 14 13 10;
+  --color-on-background: 240 230 210;
+  --color-surface-variant: 52 46 33;
 }
 
 [lang='he'] {

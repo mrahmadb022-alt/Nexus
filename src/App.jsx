@@ -11,8 +11,8 @@ import Confirmation from './pages/client/Confirmation'
 import Profile from './pages/client/Profile'
 import ManagerOverview from './pages/manager/Overview'
 import ManagerCalendar from './pages/manager/Calendar'
-import GalleryStaff from './pages/manager/GalleryStaff'
-import Marketing from './pages/manager/Marketing'
+import Staff from './pages/manager/Staff'
+import PublicPage from './pages/manager/PublicPage'
 import BusinessSettings from './pages/manager/Settings'
 
 export default function App() {
@@ -37,8 +37,8 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/manager" element={<ManagerOverview />} />
           <Route path="/manager/calendar" element={<ManagerCalendar />} />
-          <Route path="/manager/staff" element={<GalleryStaff />} />
-          <Route path="/manager/marketing" element={<Marketing />} />
+          <Route path="/manager/staff" element={<Staff />} />
+          <Route path="/manager/public-page" element={<PublicPage />} />
           <Route path="/manager/settings" element={<BusinessSettings />} />
         </Routes>
       </main>

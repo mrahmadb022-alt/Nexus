@@ -5,13 +5,15 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useData, MOCK_CLIENT_ID } from '../../context/DataContext'
 import { formatDateLong, formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
+import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function DateTimeSelection() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, setDraftDateTime, perDayHours, appointments, waitlist, joinWaitlist } = useData()
+  const { draft, setDraftDateTime, perDayHours, appointments, waitlist, joinWaitlist, businessSettings } = useData()
+  const [joiningWaitlist, guardJoinWaitlist] = useSubmitGuard()
 
   useEffect(() => {
     if (!draft.serviceId) navigate('/services', { replace: true })
@@ -79,10 +81,10 @@ export default function DateTimeSelection() {
 
   const alreadyOnWaitlist = waitlist.some((w) => w.clientId === MOCK_CLIENT_ID && w.date === selectedDate)
 
-  const handleJoinWaitlist = () => {
+  const handleJoinWaitlist = guardJoinWaitlist(() => {
     if (alreadyOnWaitlist) return
     joinWaitlist(selectedDate)
-  }
+  })
 
   const PrevIcon = isRtl ? ChevronRight : ChevronLeft
   const NextIcon = isRtl ? ChevronLeft : ChevronRight
@@ -97,8 +99,13 @@ export default function DateTimeSelection() {
         >
           <ArrowLeft size={22} className={isRtl ? 'rtl-mirror' : ''} />
         </button>
-        <h1 className="font-sans text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</h1>
-        <div className="w-10" />
+        <h1
+          className="font-sans text-display-lg-mobile font-bold text-primary flex-1 min-w-0 truncate text-center"
+          title={businessSettings.name || t('Nexus Booking')}
+        >
+          {businessSettings.name || t('Nexus Booking')}
+        </h1>
+        <div className="w-10 shrink-0" />
       </header>
 
       <main className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile py-8 space-y-10 pb-40">
@@ -233,7 +240,8 @@ export default function DateTimeSelection() {
                   <p className="font-sans text-body-sm text-on-surface-variant mb-4">{t('dt.fullyBookedBody')}</p>
                   <button
                     onClick={handleJoinWaitlist}
-                    className="bg-surface text-error border border-error px-4 py-2 rounded-full font-mono text-label-caps hover:bg-error-container transition-colors"
+                    disabled={joiningWaitlist}
+                    className="bg-surface text-error border border-error px-4 py-2 rounded-full font-mono text-label-caps hover:bg-error-container transition-colors disabled:opacity-60 disabled:pointer-events-none"
                   >
                     {t('Join Waitlist')}
                   </button>

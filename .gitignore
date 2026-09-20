@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Env files — real backend keys (Supabase/Stripe/Resend etc.) must live here, never in source.
+# *.local above already catches .env.local/.env.*.local; these cover the non-.local variants too.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

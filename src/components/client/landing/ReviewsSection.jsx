@@ -3,6 +3,7 @@ import { Star } from 'lucide-react'
 import { useLanguage } from '../../../context/LanguageContext'
 import { useData } from '../../../context/DataContext'
 import { agoLabel } from '../../../utils/date'
+import { useSubmitGuard } from '../../../hooks/useSubmitGuard'
 
 const PAGE_SIZE = 6
 
@@ -15,10 +16,11 @@ export default function ReviewsSection() {
   const [hoverRating, setHoverRating] = useState(0)
   const [text, setText] = useState('')
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [submitting, guardSubmit] = useSubmitGuard()
 
   const avgRating = reviews.length ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '—'
 
-  const handleSubmit = () => {
+  const handleSubmit = guardSubmit(() => {
     if (!text.trim()) return
     addReview(rating, text.trim())
     setText('')
@@ -26,7 +28,7 @@ export default function ReviewsSection() {
     setShowForm(false)
     setJustSubmitted(true)
     setTimeout(() => setJustSubmitted(false), 3000)
-  }
+  })
 
   return (
     <section id="reviews" className="px-margin-mobile scroll-mt-20">
@@ -81,7 +83,7 @@ export default function ReviewsSection() {
               <button onClick={() => setShowForm(false)} className="btn-secondary px-4 py-2">
                 {t('Cancel')}
               </button>
-              <button onClick={handleSubmit} className="btn-primary px-4 py-2">
+              <button onClick={handleSubmit} disabled={submitting} className="btn-primary px-4 py-2 disabled:opacity-60 disabled:pointer-events-none">
                 {t('Submit Review')}
               </button>
             </div>

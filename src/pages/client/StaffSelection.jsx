@@ -8,7 +8,7 @@ import StepIndicator from '../../components/client/StepIndicator'
 export default function StaffSelection() {
   const { t, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, setDraftStaff, staffList } = useData()
+  const { draft, setDraftStaff, staffList, businessSettings } = useData()
 
   useEffect(() => {
     if (!draft.serviceId) navigate('/services', { replace: true })
@@ -24,8 +24,13 @@ export default function StaffSelection() {
         >
           <ArrowLeft size={22} className={isRtl ? 'rtl-mirror' : ''} />
         </button>
-        <div className="font-sans text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</div>
-        <div className="w-10" />
+        <div
+          className="font-sans text-display-lg-mobile font-bold text-primary flex-1 min-w-0 truncate text-center"
+          title={businessSettings.name || t('Nexus Booking')}
+        >
+          {businessSettings.name || t('Nexus Booking')}
+        </div>
+        <div className="w-10 shrink-0" />
       </header>
 
       <main className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile pt-6 pb-40 md:pb-24 flex flex-col gap-10 md:gap-12">
@@ -58,7 +63,11 @@ export default function StaffSelection() {
                     }`}
                   >
                     <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center font-sans text-headline-md ${member.color}`}>
-                      {member.initials}
+                      {member.avatarUrl ? (
+                        <img src={member.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        member.initials
+                      )}
                     </div>
                     {active && (
                       <div className="absolute bottom-0 end-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-on-primary border-2 border-surface">

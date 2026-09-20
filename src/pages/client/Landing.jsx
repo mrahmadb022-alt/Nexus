@@ -16,7 +16,7 @@ export default function Landing() {
   const { t, isRtl } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
-  const { gallery } = useData()
+  const { gallery, businessSettings } = useData()
 
   useEffect(() => {
     if (location.hash === '#reviews') {
@@ -27,7 +27,9 @@ export default function Landing() {
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto bg-surface z-30 relative">
-        <h1 className="font-sans text-display-lg-mobile text-primary tracking-tight">{t('Nexus Booking')}</h1>
+        <h1 className="font-sans text-display-lg-mobile text-primary tracking-tight truncate min-w-0" title={businessSettings.name || t('Nexus Booking')}>
+          {businessSettings.name || t('Nexus Booking')}
+        </h1>
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
           <button

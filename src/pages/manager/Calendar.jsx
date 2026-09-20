@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Lock, LockOpen, PlaneTakeoff, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, LockOpen, PlaneTakeoff, ChevronDown, Clock3 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
-import { useData, SERVICES } from '../../context/DataContext'
-import { addDays, formatDateRange, formatTime, startOfWeek, toISODate, WEEKDAY_KEYS } from '../../utils/date'
+import { useData } from '../../context/DataContext'
+import { addDays, formatDateRange, startOfWeek, toISODate, WEEKDAY_KEYS } from '../../utils/date'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
+import DayViewModal from '../../components/manager/DayViewModal'
+import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
+import AvailableSlotsModal from '../../components/manager/AvailableSlotsModal'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const MINUTES = ['00', '15', '30', '45']
@@ -43,8 +46,11 @@ function TimeSelect({ value, onChange, disabled }) {
 
 export default function ManagerCalendar() {
   const { t, lang, isRtl } = useLanguage()
-  const { perDayHours, updateDayHours, toggleDayLock, appointments } = useData()
+  const { perDayHours, updateDayHours, toggleDayLock } = useData()
   const [weekOffset, setWeekOffset] = useState(0)
+  const [dayViewDate, setDayViewDate] = useState(null)
+  const [availDate, setAvailDate] = useState(null)
+  const [detailsAppt, setDetailsAppt] = useState(null)
 
   const weekStart = useMemo(() => addDays(startOfWeek(new Date()), weekOffset * 7), [weekOffset])
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
@@ -57,7 +63,7 @@ export default function ManagerCalendar() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <ManagerTopBar title={t('Schedule')} />
+      <ManagerTopBar />
       <div className="flex-1 p-gutter lg:p-margin-desktop">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -85,14 +91,11 @@ export default function ManagerCalendar() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7 gap-4">
           {weekDates.map((date, i) => {
             const hours = perDayHours[i]
             const iso = toISODate(date)
             const isToday = iso === todayIso
-            const dayAppointments = appointments
-              .filter((a) => a.date === iso && a.status !== 'cancelled')
-              .sort((a, b) => a.time.localeCompare(b.time))
 
             return (
               <div
@@ -165,21 +168,21 @@ export default function ManagerCalendar() {
                       <p className="font-sans text-body-sm text-on-surface-variant py-2 text-center">{t('Closed')}</p>
                     )}
 
-                    <div className="border-t border-outline-variant/50 pt-3 flex flex-col gap-2">
-                      <span className="font-mono text-label-caps text-on-surface-variant">{t('Appointments Today')}</span>
-                      {dayAppointments.length === 0 && (
-                        <span className="font-sans text-[12px] text-on-surface-variant">{t('No appointments')}</span>
-                      )}
-                      {dayAppointments.slice(0, 4).map((appt) => {
-                        const svc = SERVICES.find((s) => s.id === appt.serviceId)
-                        return (
-                          <div key={appt.id} className="flex items-center gap-2 text-[12px]">
-                            <Clock size={12} className="text-on-surface-variant shrink-0" />
-                            <span className="font-mono text-on-surface-variant shrink-0">{formatTime(appt.time, lang)}</span>
-                            <span className="text-on-surface truncate">{svc ? t(svc.nameKey) : ''}</span>
-                          </div>
-                        )
-                      })}
+                    <div className="border-t border-outline-variant/50 pt-3 flex items-stretch gap-2">
+                      <button
+                        onClick={() => setDayViewDate(iso)}
+                        className="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1.5 py-2 rounded border border-outline-variant/50 hover:border-primary/50 font-mono text-[10px] leading-tight text-on-surface-variant hover:text-primary transition-colors text-center"
+                      >
+                        <ChevronDown size={13} className="shrink-0" />
+                        <span className="break-words">{t('Appointments Today')}</span>
+                      </button>
+                      <button
+                        onClick={() => setAvailDate(iso)}
+                        className="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1.5 py-2 rounded border border-outline-variant/50 hover:border-primary/50 font-mono text-[10px] leading-tight text-on-surface-variant hover:text-primary transition-colors text-center"
+                      >
+                        <Clock3 size={13} className="shrink-0" />
+                        <span className="break-words">{t('Available')}</span>
+                      </button>
                     </div>
                   </>
                 )}
@@ -188,6 +191,18 @@ export default function ManagerCalendar() {
           })}
         </div>
       </div>
+      {dayViewDate && (
+        <DayViewModal
+          date={dayViewDate}
+          onClose={() => setDayViewDate(null)}
+          onSelectAppointment={(appt) => {
+            setDayViewDate(null)
+            setDetailsAppt(appt)
+          }}
+        />
+      )}
+      {detailsAppt && <AppointmentDetailsModal appointment={detailsAppt} onClose={() => setDetailsAppt(null)} />}
+      {availDate && <AvailableSlotsModal date={availDate} onClose={() => setAvailDate(null)} />}
     </div>
   )
 }

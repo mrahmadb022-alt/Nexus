@@ -4,12 +4,14 @@ import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 import { formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
+import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function RescheduleModal({ appointment, onClose, onConfirm }) {
   const { t, lang, isRtl } = useLanguage()
   const { perDayHours, appointments } = useData()
+  const [confirming, guardConfirm] = useSubmitGuard()
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -34,6 +36,8 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
   const [viewMonth, setViewMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState(appointment.date)
   const [selectedTime, setSelectedTime] = useState(appointment.time)
+
+  const handleConfirm = guardConfirm(() => onConfirm(selectedDate, selectedTime))
 
   const bookedTimesForDate = (isoDate) =>
     appointments
@@ -172,8 +176,8 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
 
         <div className="p-6 border-t border-outline-variant bg-surface sticky bottom-0">
           <button
-            disabled={!selectedDate || !selectedTime}
-            onClick={() => onConfirm(selectedDate, selectedTime)}
+            disabled={!selectedDate || !selectedTime || confirming}
+            onClick={handleConfirm}
             className="w-full bg-primary text-on-primary py-4 rounded-xl font-sans text-body-lg font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
           >
             {t('Confirm New Time')}

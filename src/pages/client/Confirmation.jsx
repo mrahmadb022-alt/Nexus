@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, Clock, MapPin, CheckCircle2, ArrowRight } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
-import { useData, SERVICES } from '../../context/DataContext'
+import { useData, serviceName } from '../../context/DataContext'
 import { formatDateFull, formatTime } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
+import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 
 export default function Confirmation() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings } = useData()
+  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services } = useData()
   const [confirmed, setConfirmed] = useState(false)
+  const [submitting, guard] = useSubmitGuard()
 
-  const service = SERVICES.find((s) => s.id === draft.serviceId)
+  const service = services.find((s) => s.id === draft.serviceId)
   const staff = draft.staffId ? getStaffById(draft.staffId) : null
 
   useEffect(() => {
@@ -24,10 +26,10 @@ export default function Confirmation() {
     }
   }, [draft, confirmed])
 
-  const handleConfirm = () => {
+  const handleConfirm = guard(() => {
     confirmDraftBooking()
     setConfirmed(true)
-  }
+  })
 
   const handleDone = () => {
     resetDraft()
@@ -58,7 +60,12 @@ export default function Confirmation() {
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="bg-surface flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max mx-auto sticky top-0 z-30">
-        <div className="font-sans text-display-lg-mobile font-bold text-primary">{t('Nexus Booking')}</div>
+        <div
+          className="font-sans text-display-lg-mobile font-bold text-primary truncate min-w-0"
+          title={businessSettings.name || t('Nexus Booking')}
+        >
+          {businessSettings.name || t('Nexus Booking')}
+        </div>
       </header>
 
       <main className="flex-grow w-full max-w-4xl mx-auto px-margin-mobile py-8 flex flex-col gap-10 pb-32">
@@ -70,12 +77,12 @@ export default function Confirmation() {
           </h1>
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card-client border border-surface-variant flex flex-col gap-8">
             <div className="flex flex-col md:flex-row gap-6 md:items-start">
-              <div className="w-full md:w-32 h-32 rounded-xl overflow-hidden shrink-0 shadow-sm">
-                <img src={service.image} alt="" className="w-full h-full object-cover" />
+              <div className="w-full md:w-32 h-32 rounded-xl overflow-hidden shrink-0 shadow-sm bg-surface-container flex items-center justify-center">
+                {service.image && <img src={service.image} alt="" className="w-full h-full object-cover" />}
               </div>
               <div className="flex-grow flex flex-col gap-4">
                 <div>
-                  <h3 className="font-sans text-headline-md text-on-background">{t(service.nameKey)}</h3>
+                  <h3 className="font-sans text-headline-md text-on-background">{serviceName(service, t)}</h3>
                   {staff && (
                     <p className="font-sans text-body-lg text-on-surface-variant mt-1">
                       {t('with')} {staff.name}
@@ -99,7 +106,7 @@ export default function Confirmation() {
               </div>
               <div className="md:text-end flex flex-col gap-1 md:shrink-0 border-t md:border-t-0 md:border-s border-outline-variant pt-4 md:pt-0 md:ps-6">
                 <span className="font-mono text-label-caps text-on-surface-variant">{t('Total')}</span>
-                <span className="font-sans text-display-lg-mobile text-primary">${service.price.toFixed(2)}</span>
+                <span className="font-sans text-display-lg-mobile text-primary">₪{service.price}</span>
               </div>
             </div>
 
@@ -114,7 +121,8 @@ export default function Confirmation() {
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-outline-variant">
               <button
                 onClick={handleConfirm}
-                className="flex-grow bg-primary text-on-primary py-4 px-6 rounded-xl font-sans text-[16px] font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-95 flex items-center justify-center gap-2"
+                disabled={submitting}
+                className="flex-grow bg-primary text-on-primary py-4 px-6 rounded-xl font-sans text-[16px] font-bold shadow-sm hover:bg-primary-container transition-colors active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
               >
                 {t('Confirm Appointment')} <CheckCircle2 size={20} />
               </button>

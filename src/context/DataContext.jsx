@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { addDays, toISODate } from '../utils/date'
 
 const DataContext = createContext(null)
@@ -8,11 +8,16 @@ export const MOCK_CLIENT_ID = 'you'
 const today = new Date()
 const iso = (offset) => toISODate(addDays(today, offset))
 
+// Collision-resistant client-generated IDs (not timestamp-based) — two records created in the
+// same millisecond, e.g. from a rapid double-tap slipping past the submit guard, must never
+// collide. Also the right shape to swap for server-assigned IDs once a backend exists.
+const newId = (prefix) => `${prefix}-${crypto.randomUUID()}`
+
 // ---------------------------------------------------------------------------
 // Static catalog data
 // ---------------------------------------------------------------------------
 
-export const SERVICES = [
+const INITIAL_SERVICES = [
   {
     id: 'svc-haircut',
     nameKey: 'svc.haircut.name',
@@ -117,7 +122,7 @@ const INITIAL_ANNOUNCEMENTS = [
 
 const INITIAL_OFFERS = [
   { id: 'o1', titleKey: 'offer.welcome.title', descriptionKey: 'offer.welcome.desc', discountLabel: '15%', active: true, expiresLabel: iso(60) },
-  { id: 'o2', titleKey: 'offer.fall.title', descriptionKey: 'offer.fall.desc', discountLabel: '$20', active: false, expiresLabel: iso(-5) },
+  { id: 'o2', titleKey: 'offer.fall.title', descriptionKey: 'offer.fall.desc', discountLabel: '₪20', active: false, expiresLabel: iso(-5) },
   { id: 'o3', titleKey: 'offer.referral.title', descriptionKey: 'offer.referral.desc', discountLabel: '10%', active: true, expiresLabel: iso(90) },
 ]
 
@@ -127,6 +132,8 @@ const INITIAL_APPOINTMENTS = [
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
+    clientPhone: '+1 (555) 010-1142',
+    clientEmail: 'you@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-sarah',
     date: iso(1),
@@ -138,6 +145,8 @@ const INITIAL_APPOINTMENTS = [
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
+    clientPhone: '+1 (555) 201-4488',
+    clientEmail: 'you@example.com',
     serviceId: 'svc-treatment',
     staffId: 'staff-elena',
     date: iso(-30),
@@ -149,6 +158,8 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-marcus',
     clientName: 'Marcus Johnson',
     initials: 'MJ',
+    clientPhone: '+1 (555) 233-7710',
+    clientEmail: 'marcus.johnson@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-marcus',
     date: iso(0),
@@ -160,6 +171,8 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-emma',
     clientName: 'Emma Lawson',
     initials: 'EL',
+    clientPhone: '+1 (555) 448-2291',
+    clientEmail: 'emma.lawson@example.com',
     serviceId: 'svc-balayage',
     staffId: 'staff-david',
     date: iso(0),
@@ -171,6 +184,8 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-tom',
     clientName: 'Tom Richards',
     initials: 'TR',
+    clientPhone: '+1 (555) 672-0143',
+    clientEmail: 'tom.richards@example.com',
     serviceId: 'svc-beard',
     staffId: 'staff-marcus',
     date: iso(0),
@@ -180,8 +195,24 @@ const INITIAL_APPOINTMENTS = [
 ]
 
 const INITIAL_WAITLIST = [
-  { id: 'w1', clientId: 'c-amanda', clientName: 'Amanda Lee', date: iso(2), note: 'Any cut before 4PM', createdAt: Date.now() - 10 * 60000 },
-  { id: 'w2', clientId: 'c-david2', clientName: 'David Chen', date: iso(1), note: 'Color touch-up (urgent)', createdAt: Date.now() - 60 * 60000 },
+  {
+    id: 'w1',
+    clientId: 'c-amanda',
+    clientName: 'Amanda Lee',
+    clientPhone: '+1 (555) 391-6620',
+    date: iso(2),
+    note: 'Any cut before 4PM',
+    createdAt: Date.now() - 10 * 60000,
+  },
+  {
+    id: 'w2',
+    clientId: 'c-david2',
+    clientName: 'David Chen',
+    clientPhone: '+1 (555) 807-2254',
+    date: iso(1),
+    note: 'Color touch-up (urgent)',
+    createdAt: Date.now() - 60 * 60000,
+  },
 ]
 
 const DEFAULT_PER_DAY_HOURS = {
@@ -203,6 +234,7 @@ const DEFAULT_BUSINESS_SETTINGS = {
   heroBackground: 'https://picsum.photos/seed/nexus-hero-bg/1600/900',
   logoUrl: null,
   about: null,
+  theme: 'classic',
 }
 
 const DEFAULT_CLIENT_PROFILE = {
@@ -224,6 +256,7 @@ export function DataProvider({ children }) {
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS)
   const [gallery, setGallery] = useState(INITIAL_GALLERY)
   const [staffList, setStaffList] = useState(STAFF)
+  const [services, setServices] = useState(INITIAL_SERVICES)
   const [reviews, setReviews] = useState(INITIAL_REVIEWS)
   const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS)
   const [offers, setOffers] = useState(INITIAL_OFFERS)
@@ -231,6 +264,18 @@ export function DataProvider({ children }) {
   const [perDayHours, setPerDayHours] = useState(DEFAULT_PER_DAY_HOURS)
   const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
   const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
+
+  // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
+  // createPortal(..., document.body) too, not just the React tree under this provider.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', businessSettings.theme || 'classic')
+  }, [businessSettings.theme])
+
+  // Browser tab title lives outside the React tree (set once in index.html at build time),
+  // so it needs its own sync whenever the salon name changes.
+  useEffect(() => {
+    document.title = businessSettings.name || 'Nexus Booking'
+  }, [businessSettings.name])
 
   // Booking draft (multi-step client flow). staffId starts `undefined` (not yet
   // touched) rather than `null`, since `null` is itself a valid explicit choice
@@ -244,10 +289,12 @@ export function DataProvider({ children }) {
 
   const confirmDraftBooking = () => {
     const newAppt = {
-      id: `apt-${Date.now()}`,
+      id: newId('apt'),
       clientId: MOCK_CLIENT_ID,
       clientName: clientProfile.name || 'You',
       initials: initialsFromName(clientProfile.name || 'You'),
+      clientPhone: clientProfile.phone || '',
+      clientEmail: clientProfile.email || '',
       serviceId: draft.serviceId,
       staffId: draft.staffId,
       date: draft.date,
@@ -271,9 +318,10 @@ export function DataProvider({ children }) {
   const declineWaitlist = (id) => setWaitlist((prev) => prev.filter((w) => w.id !== id))
   const joinWaitlist = (date, note = '') => {
     const entry = {
-      id: `w-${Date.now()}`,
+      id: newId('w'),
       clientId: MOCK_CLIENT_ID,
       clientName: clientProfile.name || 'You',
+      clientPhone: clientProfile.phone || '',
       date,
       note,
       createdAt: Date.now(),
@@ -285,7 +333,7 @@ export function DataProvider({ children }) {
   const addReview = (rating, text) => {
     const name = clientProfile.name || 'You'
     const review = {
-      id: `r-${Date.now()}`,
+      id: newId('r'),
       clientId: MOCK_CLIENT_ID,
       name,
       initials: initialsFromName(name),
@@ -297,19 +345,26 @@ export function DataProvider({ children }) {
     return review
   }
 
-  const addPhoto = (url) => setGallery((prev) => [...prev, { id: `g-${Date.now()}`, url }])
+  const addPhoto = (url) => setGallery((prev) => [...prev, { id: newId('g'), url }])
   const removePhotos = (ids) => setGallery((prev) => prev.filter((g) => !ids.includes(g.id)))
 
   const addStaffMember = (member) =>
-    setStaffList((prev) => [...prev, { id: `staff-${Date.now()}`, color: 'bg-surface-container-highest text-on-surface', ...member }])
+    setStaffList((prev) => [...prev, { id: newId('staff'), color: 'bg-surface-container-highest text-on-surface', ...member }])
   const removeStaffMember = (id) => setStaffList((prev) => prev.filter((s) => s.id !== id))
+  const updateStaffMember = (id, patch) =>
+    setStaffList((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+
+  const addService = (service) =>
+    setServices((prev) => [...prev, { id: newId('svc'), nameKey: null, descKey: null, image: null, ...service }])
+  const updateService = (id, patch) => setServices((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+  const removeService = (id) => setServices((prev) => prev.filter((s) => s.id !== id))
 
   const toggleOfferActive = (id) =>
     setOffers((prev) => prev.map((o) => (o.id === id ? { ...o, active: !o.active } : o)))
-  const addOffer = (offer) => setOffers((prev) => [{ id: `o-${Date.now()}`, active: true, ...offer }, ...prev])
+  const addOffer = (offer) => setOffers((prev) => [{ id: newId('o'), active: true, ...offer }, ...prev])
   const removeAnnouncement = (id) => setAnnouncements((prev) => prev.filter((a) => a.id !== id))
   const addAnnouncement = (ann) =>
-    setAnnouncements((prev) => [{ id: `a-${Date.now()}`, channels: ['Client App'], dot: 'bg-primary', ...ann }, ...prev])
+    setAnnouncements((prev) => [{ id: newId('a'), channels: ['Client App'], dot: 'bg-primary', ...ann }, ...prev])
 
   const updateDayHours = (dayIndex, patch) =>
     setPerDayHours((prev) => ({ ...prev, [dayIndex]: { ...prev[dayIndex], ...patch } }))
@@ -325,6 +380,7 @@ export function DataProvider({ children }) {
     appointments,
     gallery,
     staffList,
+    services,
     reviews,
     announcements,
     offers,
@@ -350,6 +406,10 @@ export function DataProvider({ children }) {
     removePhotos,
     addStaffMember,
     removeStaffMember,
+    updateStaffMember,
+    addService,
+    updateService,
+    removeService,
     toggleOfferActive,
     addOffer,
     removeAnnouncement,
@@ -367,7 +427,14 @@ export function DataProvider({ children }) {
 // eslint-disable-next-line react-refresh/only-export-components
 export const useData = () => useContext(DataContext)
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function getService(id) {
-  return SERVICES.find((s) => s.id === id)
+// Service names/descriptions come either from a translation key (seed catalog)
+// or a plain string (services added by a manager), mirroring how announcements/offers work.
+export function serviceName(svc, t) {
+  if (!svc) return ''
+  return svc.nameKey ? t(svc.nameKey) : svc.name || ''
+}
+
+export function serviceDesc(svc, t) {
+  if (!svc) return ''
+  return svc.descKey ? t(svc.descKey) : svc.description || ''
 }
