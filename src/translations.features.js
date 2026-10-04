@@ -384,7 +384,31 @@ const messaging = {
   },
 }
 
-const GROUPS = [general, contact, finance, messaging]
+const calendar = {
+  en: {
+    'feature.calendar.name': 'Calendar',
+    'feature.calendar.desc': 'Add to calendar (.ics), Google Calendar links and exporting all bookings.',
+    'calendar.add': 'Add to calendar',
+    'calendar.google': 'Google Calendar',
+    'calendar.exportAll': 'Export all bookings (.ics)',
+  },
+  he: {
+    'feature.calendar.name': 'יומן',
+    'feature.calendar.desc': 'הוספה ליומן (.ics), קישורים ל-Google Calendar וייצוא כל התורים.',
+    'calendar.add': 'הוספה ליומן',
+    'calendar.google': 'Google Calendar',
+    'calendar.exportAll': 'ייצוא כל התורים (.ics)',
+  },
+  ar: {
+    'feature.calendar.name': 'التقويم',
+    'feature.calendar.desc': 'إضافة إلى التقويم (.ics)، روابط Google Calendar وتصدير كل الحجوزات.',
+    'calendar.add': 'إضافة إلى التقويم',
+    'calendar.google': 'Google Calendar',
+    'calendar.exportAll': 'تصدير كل الحجوزات (.ics)',
+  },
+}
+
+const GROUPS = [general, contact, finance, messaging, calendar]
 
 export const featureTranslations = Object.fromEntries(
   ['en', 'he', 'ar'].map((lang) => [lang, Object.assign({}, ...GROUPS.map((g) => g[lang]))]),

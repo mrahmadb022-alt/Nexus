@@ -9,6 +9,7 @@ import RescheduleModal from '../../components/client/RescheduleModal'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import ContactActions from '../../components/ContactActions'
+import CalendarActions from '../../components/CalendarActions'
 import { useBookingMessage } from '../../hooks/useBookingMessage'
 import { normalizePhone } from '../../lib/phone'
 import { todayIso as todayInTz } from '../../lib/time'
@@ -163,6 +164,7 @@ export default function Profile() {
                       <XCircle size={18} /> {t('Cancel')}
                     </button>
                   </div>
+                  <CalendarActions appointment={appt} />
                   <ContactActions
                     variant="inline"
                     phone={businessSettings.phone}

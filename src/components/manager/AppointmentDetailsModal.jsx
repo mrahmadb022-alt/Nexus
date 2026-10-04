@@ -9,6 +9,7 @@ import { formatShekels } from '../../lib/money'
 import { formatPhoneDisplay } from '../../lib/phone'
 import ContactActions from '../ContactActions'
 import PaymentEditor from './PaymentEditor'
+import CalendarActions from '../CalendarActions'
 import { useBookingMessage } from '../../hooks/useBookingMessage'
 
 export default function AppointmentDetailsModal({ appointment: initial, onClose }) {
@@ -99,6 +100,7 @@ export default function AppointmentDetailsModal({ appointment: initial, onClose 
               </div>
             )}
           </div>
+          <CalendarActions appointment={appointment} audience="owner" />
           {isFeatureOn('finance') && <PaymentEditor key={appointment.id} appointment={appointment} />}
         </div>
 

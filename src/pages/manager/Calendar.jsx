@@ -8,6 +8,7 @@ import DayViewModal from '../../components/manager/DayViewModal'
 import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
 import AvailableSlotsModal from '../../components/manager/AvailableSlotsModal'
 import { todayIso as todayInTz } from '../../lib/time'
+import ExportCalendarButton from '../../components/manager/ExportCalendarButton'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const MINUTES = ['00', '15', '30', '45']
@@ -70,6 +71,9 @@ export default function ManagerCalendar() {
           <div>
             <h2 className="font-sans text-display-lg text-primary">{t('Schedule')}</h2>
             <p className="font-sans text-body-lg text-on-surface-variant mt-1">{t('Manage weekly availability and working hours.')}</p>
+            <div className="mt-3">
+              <ExportCalendarButton />
+            </div>
           </div>
           <div className="flex items-center gap-2 bg-surface-container-low rounded-md p-1 border border-outline-variant shadow-sm self-start">
             <button

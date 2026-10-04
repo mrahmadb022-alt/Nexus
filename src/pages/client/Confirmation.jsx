@@ -7,12 +7,13 @@ import { formatDateFull, formatTime } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import { formatShekels } from '../../lib/money'
+import CalendarActions from '../../components/CalendarActions'
 
 export default function Confirmation() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
   const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services } = useData()
-  const [confirmed, setConfirmed] = useState(false)
+  const [confirmed, setConfirmed] = useState(null)
   const [submitting, guard] = useSubmitGuard()
 
   const service = services.find((s) => s.id === draft.serviceId)
@@ -28,8 +29,7 @@ export default function Confirmation() {
   }, [draft, confirmed])
 
   const handleConfirm = guard(() => {
-    confirmDraftBooking()
-    setConfirmed(true)
+    setConfirmed(confirmDraftBooking())
   })
 
   const handleDone = () => {
@@ -44,7 +44,10 @@ export default function Confirmation() {
           <CheckCircle2 size={40} />
         </div>
         <h1 className="font-sans text-display-lg text-on-background mb-3">{t('Booking Confirmed')}</h1>
-        <p className="font-sans text-body-lg text-on-surface-variant max-w-sm mb-8">{t('confirm.successBody')}</p>
+        <p className="font-sans text-body-lg text-on-surface-variant max-w-sm mb-6">{t('confirm.successBody')}</p>
+        <div className="mb-8">
+          <CalendarActions appointment={confirmed} />
+        </div>
         <button
           onClick={handleDone}
           className="h-14 px-8 bg-primary text-on-primary rounded-xl font-sans text-headline-md flex items-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"

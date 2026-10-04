@@ -48,3 +48,8 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - Scheduled reminders are computed, not stored (`scheduledReminders` in `src/lib/messages.js`): active future bookings, sent N hours before their start on the Jerusalem clock, or immediately if the booking is already inside that window.
 - Message text uses the language of the person acting at that moment. The two seeded log entries render in the current UI language.
 - The page shows the badge "Demo mode, connects after backend setup" (translated).
+
+## 4. Calendar
+- `src/lib/ics.js` is ported from booking-app: RFC 5545 escaping, 75-octet folding that never splits a Hebrew/Arabic character, and UTC times computed from the Jerusalem wall clock plus the booking's snapshot duration.
+- Per booking: an "Add to calendar" button (.ics download) next to a Google Calendar template link (no OAuth). They appear on the client's confirmation screen, the client's upcoming bookings, and the manager's appointment modal. Clients see "service · salon"; the manager's copy shows "client · service" with the phone.
+- "Export all bookings (.ics)" sits on the Schedule page. Cancelled bookings are included with `STATUS:CANCELLED`, so re-importing removes them. `SEQUENCE` follows `updatedAt`, so reschedules replace the old event.
