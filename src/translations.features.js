@@ -509,7 +509,55 @@ const receipts = {
   },
 }
 
-const GROUPS = [general, contact, finance, messaging, calendar, receipts]
+const marketing = {
+  en: {
+    'feature.marketing.name': 'Marketing',
+    'feature.marketing.desc': 'Opt-in checkbox when booking, and a campaign composer on the Messages page.',
+    'consent.label': "Send me offers and updates from {business} on WhatsApp. I can opt out at any time.",
+    'campaign.title': 'Campaign',
+    'campaign.audience': 'Goes to {n} clients who opted in to marketing.',
+    'campaign.body': 'Message',
+    'campaign.placeholder': 'e.g. 20% off gel manicures this week',
+    'campaign.preview': 'Preview',
+    'campaign.legalNote': 'The "Ad" prefix, your business name and the opt-out line are added automatically, as the law requires.',
+    'campaign.optOut': 'To stop receiving these messages, reply STOP.',
+    'campaign.send': 'Add to message log',
+    'campaign.logged': 'Added to the log ✓',
+    'campaign.recipients': '{n} recipients',
+  },
+  he: {
+    'feature.marketing.name': 'שיווק',
+    'feature.marketing.desc': 'תיבת הסכמה בעת קביעת תור, וכלי לכתיבת קמפיין בעמוד ההודעות.',
+    'consent.label': 'אשמח לקבל מבצעים ועדכונים מ-{business} ב-WhatsApp. אפשר להסיר את עצמי בכל עת.',
+    'campaign.title': 'קמפיין',
+    'campaign.audience': 'יישלח ל-{n} לקוחות שהסכימו לקבל דיוור.',
+    'campaign.body': 'הודעה',
+    'campaign.placeholder': 'למשל: 20% הנחה על לק ג׳ל השבוע',
+    'campaign.preview': 'תצוגה מקדימה',
+    'campaign.legalNote': 'המילה "פרסומת", שם העסק ושורת ההסרה מתווספים אוטומטית, כנדרש בחוק.',
+    'campaign.optOut': 'להסרה מרשימת התפוצה השיבו "הסר".',
+    'campaign.send': 'הוספה ליומן ההודעות',
+    'campaign.logged': 'נוסף ליומן ✓',
+    'campaign.recipients': '{n} נמענים',
+  },
+  ar: {
+    'feature.marketing.name': 'التسويق',
+    'feature.marketing.desc': 'خانة موافقة عند الحجز، وأداة لكتابة حملة في صفحة الرسائل.',
+    'consent.label': 'أرسلوا لي عروضاً وتحديثات من {business} عبر WhatsApp. يمكنني إلغاء الاشتراك في أي وقت.',
+    'campaign.title': 'حملة',
+    'campaign.audience': 'تُرسل إلى {n} عملاء وافقوا على تلقي الرسائل التسويقية.',
+    'campaign.body': 'الرسالة',
+    'campaign.placeholder': 'مثلاً: خصم 20% على مانيكير الجل هذا الأسبوع',
+    'campaign.preview': 'معاينة',
+    'campaign.legalNote': 'تُضاف كلمة "إعلان" واسم عملك وسطر إلغاء الاشتراك تلقائياً كما يتطلب القانون.',
+    'campaign.optOut': 'لإيقاف هذه الرسائل، أرسل "إيقاف".',
+    'campaign.send': 'إضافة إلى سجل الرسائل',
+    'campaign.logged': 'أُضيفت إلى السجل ✓',
+    'campaign.recipients': '{n} مستلمين',
+  },
+}
+
+const GROUPS = [general, contact, finance, messaging, calendar, receipts, marketing]
 
 export const featureTranslations = Object.fromEntries(
   ['en', 'he', 'ar'].map((lang) => [lang, Object.assign({}, ...GROUPS.map((g) => g[lang]))]),

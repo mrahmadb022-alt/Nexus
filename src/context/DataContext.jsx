@@ -309,6 +309,11 @@ export function DataProvider({ children }) {
   const { t, lang } = useLanguage()
   const [receiptSettings, setReceiptSettings] = useState({ businessType: 'exempt' })
   const [confirmations, setConfirmations] = useState([])
+  // clientId → marketing consent. Only an explicit choice changes it (see lib/marketing.js).
+  const [marketingConsents, setMarketingConsents] = useState(() =>
+    Object.fromEntries(SEED_HISTORY.clients.map((c) => [c.clientId, c.marketingConsent])),
+  )
+  const setMarketingConsent = (clientId, consent) => setMarketingConsents((prev) => ({ ...prev, [clientId]: consent }))
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -325,12 +330,14 @@ export function DataProvider({ children }) {
   // Booking draft (multi-step client flow). staffId starts `undefined` (not yet
   // touched) rather than `null`, since `null` is itself a valid explicit choice
   // ("Any Available" / "No Preference") that the Continue button needs to unlock.
-  const [draft, setDraft] = useState({ serviceId: null, staffId: undefined, date: null, time: null })
+  const [draft, setDraft] = useState({ serviceId: null, staffId: undefined, date: null, time: null, marketingConsent: false })
 
   const setDraftService = (serviceId) => setDraft((d) => ({ ...d, serviceId }))
   const setDraftStaff = (staffId) => setDraft((d) => ({ ...d, staffId }))
   const setDraftDateTime = (date, time) => setDraft((d) => ({ ...d, date, time }))
-  const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null })
+  const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null, marketingConsent: false })
+  // Marketing opt-in on the booking form. Never pre-checked: every new draft starts false.
+  const setDraftMarketingConsent = (marketingConsent) => setDraft((d) => ({ ...d, marketingConsent }))
 
   // --- Simulated automated messages -------------------------------------------------------
   // Nothing is actually sent: entries record what *would* go out once a messaging backend is
@@ -359,6 +366,10 @@ export function DataProvider({ children }) {
     })
   }
 
+  // Campaigns are simulated too: one log entry with the full text and how many opted-in
+  // clients it would reach.
+  const logCampaign = ({ body, recipientCount }) => logMessage({ kind: 'marketing', body, recipientCount })
+
   const updateMessagingSettings = (patch) => setMessagingSettings((prev) => ({ ...prev, ...patch }))
 
   const confirmDraftBooking = () => {
@@ -375,7 +386,9 @@ export function DataProvider({ children }) {
       time: draft.time,
       status: 'confirmed',
       createdAt: Date.now(),
+      marketingConsent: draft.marketingConsent === true,
     }, services)
+    if (draft.marketingConsent === true) setMarketingConsent(MOCK_CLIENT_ID, true)
     setAppointments((prev) => [...prev, newAppt])
     logBookingMessage('confirmation', newAppt)
     return newAppt
@@ -546,6 +559,7 @@ export function DataProvider({ children }) {
     messagingSettings,
     receiptSettings,
     confirmations,
+    marketingConsents,
     messageLog,
 
     setDraftService,
@@ -556,6 +570,9 @@ export function DataProvider({ children }) {
     cancelAppointment,
     recordPayment,
     issueConfirmation,
+    setMarketingConsent,
+    setDraftMarketingConsent,
+    logCampaign,
     updateReceiptSettings,
     logBookingMessage,
     logMessage,

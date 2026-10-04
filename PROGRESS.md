@@ -10,7 +10,7 @@ Resume from here after /clear. Spec: ROADMAP.md. Decisions: DECISIONS.md.
 | 3 | Automated messages (simulated) + log | done |
 | 4 | Calendar: .ics + Google link + export all | done |
 | 5 | Receipts (demo) | done |
-| 6 | Marketing consent + campaign composer | todo |
+| 6 | Marketing consent + campaign composer | done |
 | 7 | Staff availability per staff member | todo |
 | — | Playwright smoke test (375px, Hebrew), push branch | todo |
 

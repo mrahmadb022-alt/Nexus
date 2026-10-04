@@ -12,6 +12,7 @@ import ContactActions from '../../components/ContactActions'
 import CalendarActions from '../../components/CalendarActions'
 import { useBookingMessage } from '../../hooks/useBookingMessage'
 import { normalizePhone } from '../../lib/phone'
+import MarketingConsent from '../../components/client/MarketingConsent'
 import { todayIso as todayInTz } from '../../lib/time'
 
 export default function Profile() {
@@ -30,6 +31,8 @@ export default function Profile() {
     services,
     businessSettings,
     isFeatureOn,
+    marketingConsents,
+    setMarketingConsent,
   } = useData()
   const bookingMessage = useBookingMessage()
   const [rescheduling, setRescheduling] = useState(null)
@@ -111,6 +114,11 @@ export default function Profile() {
               />
             </div>
           </div>
+          <MarketingConsent
+            id="profile-marketing-consent"
+            checked={marketingConsents[MOCK_CLIENT_ID] === true}
+            onChange={(on) => setMarketingConsent(MOCK_CLIENT_ID, on)}
+          />
           <div className="flex items-center gap-3 justify-end">
             {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}
             <button onClick={handleSaveProfile} disabled={savingProfile} className="btn-primary px-6 py-2.5 disabled:opacity-60 disabled:pointer-events-none">

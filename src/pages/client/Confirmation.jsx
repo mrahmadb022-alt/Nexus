@@ -8,11 +8,12 @@ import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import { formatShekels } from '../../lib/money'
 import CalendarActions from '../../components/CalendarActions'
+import MarketingConsent from '../../components/client/MarketingConsent'
 
 export default function Confirmation() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services } = useData()
+  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services, setDraftMarketingConsent } = useData()
   const [confirmed, setConfirmed] = useState(null)
   const [submitting, guard] = useSubmitGuard()
 
@@ -121,6 +122,8 @@ export default function Confirmation() {
                 <p className="font-sans text-body-sm text-on-surface-variant whitespace-pre-line">{businessSettings.address}</p>
               </div>
             </div>
+
+            <MarketingConsent checked={draft.marketingConsent === true} onChange={setDraftMarketingConsent} />
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-outline-variant">
               <button

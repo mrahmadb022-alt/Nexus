@@ -5,6 +5,7 @@ import { useData } from '../../context/DataContext'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import Switch from '../../components/Switch'
 import DemoBadge from '../../components/DemoBadge'
+import CampaignComposer from '../../components/manager/CampaignComposer'
 import { scheduledReminders } from '../../lib/messages'
 import { whatsappHref } from '../../lib/phone'
 import { formatStamp } from '../../utils/date'
@@ -140,6 +141,8 @@ export default function Messages() {
             </ul>
           )}
         </section>
+
+        <CampaignComposer />
 
         <section className="bg-surface border border-outline-variant rounded-md shadow-sm p-5 flex flex-col gap-4">
           <h3 className="font-sans text-headline-md text-on-background">{t('messages.log')}</h3>
