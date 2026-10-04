@@ -10,6 +10,7 @@ import StatusPill from '../../components/StatusPill'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
 import ContactActions from '../../components/ContactActions'
+import ToolLinks from '../../components/manager/ToolLinks'
 import { useBookingMessage } from '../../hooks/useBookingMessage'
 
 export default function ManagerOverview() {
@@ -60,6 +61,8 @@ export default function ManagerOverview() {
             {t('New Booking')}
           </button>
         </div>
+
+        <ToolLinks />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
           <div className="lg:col-span-8 flex flex-col gap-6">

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, IdCard, Megaphone, Settings, ArrowLeftRight } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, IdCard, Megaphone, Settings, ArrowLeftRight, Wallet } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 import LanguageSwitcher from '../LanguageSwitcher'
@@ -9,13 +9,14 @@ const LINKS = [
   { to: '/manager/calendar', icon: CalendarDays, label: 'Schedule' },
   { to: '/manager/staff', icon: IdCard, label: 'Staff' },
   { to: '/manager/public-page', icon: Megaphone, label: 'Public Page' },
+  { to: '/manager/finance', icon: Wallet, label: 'nav.finance', feature: 'finance' },
   { to: '/manager/settings', icon: Settings, label: 'Settings' },
 ]
 
 export default function ManagerSidebar() {
   const { pathname } = useLocation()
   const { t } = useLanguage()
-  const { businessSettings } = useData()
+  const { businessSettings, isFeatureOn } = useData()
 
   return (
     <nav className="hidden lg:flex flex-col h-screen sticky top-0 start-0 z-40 py-6 w-72 border-e border-outline-variant bg-surface shrink-0">
@@ -36,7 +37,7 @@ export default function ManagerSidebar() {
         </div>
       </div>
       <div className="flex flex-col gap-1 flex-1 px-2">
-        {LINKS.map(({ to, icon: Icon, label, end }) => {
+        {LINKS.filter((l) => !l.feature || isFeatureOn(l.feature)).map(({ to, icon: Icon, label, end }) => {
           const active = end ? pathname === to : pathname.startsWith(to)
           return (
             <Link

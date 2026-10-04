@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { todayIso, addDaysIso } from '../lib/time'
 import { DEFAULT_FEATURES } from '../lib/features'
+import { buildSeedHistory } from './seedHistory'
 
 const DataContext = createContext(null)
 
@@ -195,6 +196,28 @@ const INITIAL_APPOINTMENTS = [
   },
 ]
 
+const SEED_HISTORY = buildSeedHistory({ services: INITIAL_SERVICES, staff: STAFF })
+
+// Every booking snapshots its price and duration at creation (so later catalog edits don't
+// rewrite history) and carries payment fields. Money is integer agorot.
+function withBookingDefaults(appt, services) {
+  const svc = services.find((s) => s.id === appt.serviceId)
+  return {
+    paymentStatus: appt.status === 'cancelled' ? 'cancelled' : 'unpaid',
+    paymentMethod: null,
+    amountPaidAgorot: null,
+    marketingConsent: false,
+    createdAt: Date.now() - 7 * 86400000,
+    ...appt,
+    priceAgorot: appt.priceAgorot ?? svc?.priceAgorot ?? 0,
+    durationMinutes: appt.durationMinutes ?? svc?.duration ?? 30,
+  }
+}
+
+const SEEDED_APPOINTMENTS = [...SEED_HISTORY.bookings, ...INITIAL_APPOINTMENTS].map((a) =>
+  withBookingDefaults(a, INITIAL_SERVICES),
+)
+
 const INITIAL_WAITLIST = [
   {
     id: 'w1',
@@ -254,7 +277,7 @@ function initialsFromName(name) {
 }
 
 export function DataProvider({ children }) {
-  const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS)
+  const [appointments, setAppointments] = useState(SEEDED_APPOINTMENTS)
   const [gallery, setGallery] = useState(INITIAL_GALLERY)
   const [staffList, setStaffList] = useState(STAFF)
   const [services, setServices] = useState(INITIAL_SERVICES)
@@ -268,6 +291,7 @@ export function DataProvider({ children }) {
   // Kept out of businessSettings on purpose: the Settings page edits a local copy of
   // businessSettings and writes the whole object back on Save, which would revert toggles.
   const [features, setFeatures] = useState(DEFAULT_FEATURES)
+  const [expenses, setExpenses] = useState(SEED_HISTORY.expenses)
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -292,7 +316,7 @@ export function DataProvider({ children }) {
   const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null })
 
   const confirmDraftBooking = () => {
-    const newAppt = {
+    const newAppt = withBookingDefaults({
       id: newId('apt'),
       clientId: MOCK_CLIENT_ID,
       clientName: clientProfile.name || 'You',
@@ -304,16 +328,60 @@ export function DataProvider({ children }) {
       date: draft.date,
       time: draft.time,
       status: 'confirmed',
-    }
+      createdAt: Date.now(),
+    }, services)
     setAppointments((prev) => [...prev, newAppt])
     return newAppt
   }
 
   const cancelAppointment = (id) =>
-    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status: 'cancelled' } : a)))
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? { ...a, status: 'cancelled', paymentStatus: a.paymentStatus === 'paid' ? 'paid' : 'cancelled', updatedAt: Date.now() }
+          : a,
+      ),
+    )
+
+  // Payment status/method/amount for one booking. Marking it cancelled also cancels the
+  // booking; un-cancelling a payment puts a cancelled booking back to confirmed.
+  const recordPayment = (id, { paymentStatus, paymentMethod, amountPaidAgorot }) =>
+    setAppointments((prev) =>
+      prev.map((a) => {
+        if (a.id !== id) return a
+        let status = a.status
+        if (paymentStatus === 'cancelled') status = 'cancelled'
+        else if (a.status === 'cancelled') status = 'confirmed'
+        return {
+          ...a,
+          status,
+          paymentStatus,
+          paymentMethod: paymentStatus === 'paid' ? paymentMethod : null,
+          amountPaidAgorot: paymentStatus === 'paid' ? amountPaidAgorot : null,
+          updatedAt: Date.now(),
+        }
+      }),
+    )
+
+  const addExpense = (expense) => setExpenses((prev) => [{ id: newId('exp'), note: '', ...expense }, ...prev])
+  const updateExpense = (id, patch) =>
+    setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch, noteKey: 'note' in patch ? null : e.noteKey } : e)))
+  const removeExpense = (id) => setExpenses((prev) => prev.filter((e) => e.id !== id))
 
   const rescheduleAppointment = (id, date, time) =>
-    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, date, time, status: 'confirmed' } : a)))
+    setAppointments((prev) => prev.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              date,
+              time,
+              status: 'confirmed',
+              paymentStatus: a.paymentStatus === 'cancelled' ? 'unpaid' : a.paymentStatus,
+              updatedAt: Date.now(),
+            }
+          : a,
+      ),
+    )
 
   const updateAppointmentStatus = (id, status) =>
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)))
@@ -397,6 +465,7 @@ export function DataProvider({ children }) {
     clientProfile,
     draft,
     features,
+    expenses,
 
     setDraftService,
     setDraftStaff,
@@ -404,6 +473,10 @@ export function DataProvider({ children }) {
     resetDraft,
     confirmDraftBooking,
     cancelAppointment,
+    recordPayment,
+    addExpense,
+    updateExpense,
+    removeExpense,
     rescheduleAppointment,
     updateAppointmentStatus,
     approveWaitlist,

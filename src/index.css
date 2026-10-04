@@ -9,6 +9,8 @@
      (no rgb()/commas) so tailwind.config.js can compose them as rgb(var(--x) / <alpha-value>),
      which keeps opacity modifiers like bg-primary/40 working. These are the exact colors the
      app shipped with, converted from hex, so the default look is unchanged by this system. */
+  --viz-income: 42 120 214;
+  --viz-expense: 235 104 52;
   --color-surface: 249 249 255;
   --color-surface-dim: 207 218 242;
   --color-surface-bright: 249 249 255;
@@ -103,6 +105,8 @@
 
 /* "Onyx" — bold/masculine preset: dark charcoal, muted teal primary, steel-grey secondary. */
 [data-theme='onyx'] {
+  --viz-income: 57 135 229;
+  --viz-expense: 217 89 38;
   --color-surface: 23 24 26;
   --color-surface-dim: 16 17 18;
   --color-surface-bright: 61 64 67;
@@ -245,6 +249,8 @@
 /* "Noir Gold" — black & gold preset: near-black surfaces, gold primary, muted bronze secondary
    (kept as a separate, less saturated accent so gold doesn't get overused as the only color). */
 [data-theme='noir-gold'] {
+  --viz-income: 57 135 229;
+  --viz-expense: 217 89 38;
   --color-surface: 14 13 10;
   --color-surface-dim: 8 7 5;
   --color-surface-bright: 50 45 34;

@@ -30,3 +30,13 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - Client side: each upcoming booking has a "Contact the salon" Call/WhatsApp row using the business phone, with a localized "about my booking" text.
 - Messages use the language of whoever is acting in the UI right now. There is no per-client language yet. Times are always 24h (`14:00`).
 - Phone inputs (client profile, business settings) show a hint when the number can't be normalized.
+
+## 2. Payments & finance
+- Bookings carry `paymentStatus` (`unpaid` | `paid` | `no_show` | `cancelled`), `paymentMethod` (`cash` | `bit` | `card` | `transfer` | `other`) and `amountPaidAgorot`. Setting the payment to "cancelled" also cancels the booking. Cancelling a booking sets its payment to "cancelled" unless it was already paid. Rescheduling a cancelled booking resets its payment to "unpaid".
+- The payment editor lives in the appointment details modal. The modal now reads the live booking from context, so edits show up straight away.
+- Finance math is `src/lib/finance.js`, ported from booking-app. Income counts paid bookings on the date of service. The no-show rate is no-shows divided by non-cancelled bookings that already happened. The page states it is a management overview, not bookkeeping.
+- Demo history (`src/context/seedHistory.js`): about 10 weeks of paid, no-show, and cancelled bookings plus monthly expenses, from a seeded PRNG so the numbers are stable. The range defaults to "last 30 days", because "this month" is nearly empty early in a month.
+- Expense categories: materials, rent, equipment, marketing, other.
+- Charts are plain HTML/flex, so RTL mirrors automatically. The two-series trend uses fixed blue/orange tokens (`--viz-income`, `--viz-expense`), checked with the dataviz palette validator on light and dark surfaces. The theme primary/secondary pairs failed the CVD checks on dark themes. Single-series bar lists use the theme primary. The trend chart has a hover/focus tooltip and a table view.
+- Exports: CSV has a UTF-8 BOM, CRLF line endings, and formula-injection guarding. XLSX uses a minimal writer on `fflate` (the only new runtime dependency) and is right-to-left for he/ar. Headers follow the current language. Money is exported in shekels with 2 decimals.
+- Navigation: at 375px the bottom nav already has five tabs, so tool pages are reached from cards on the dashboard (`ToolLinks`) plus links in the desktop sidebar.

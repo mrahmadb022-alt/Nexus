@@ -8,11 +8,14 @@ import StatusPill from '../StatusPill'
 import { formatShekels } from '../../lib/money'
 import { formatPhoneDisplay } from '../../lib/phone'
 import ContactActions from '../ContactActions'
+import PaymentEditor from './PaymentEditor'
 import { useBookingMessage } from '../../hooks/useBookingMessage'
 
-export default function AppointmentDetailsModal({ appointment, onClose }) {
+export default function AppointmentDetailsModal({ appointment: initial, onClose }) {
   const { t, lang } = useLanguage()
-  const { services, getStaffById, updateAppointmentStatus } = useData()
+  const { services, getStaffById, updateAppointmentStatus, appointments, isFeatureOn } = useData()
+  // Parents pass a snapshot; read the live record so edits made here (payment, status) show up.
+  const appointment = appointments.find((a) => a.id === initial.id) || initial
   const bookingMessage = useBookingMessage()
 
   useEffect(() => {
@@ -96,6 +99,7 @@ export default function AppointmentDetailsModal({ appointment, onClose }) {
               </div>
             )}
           </div>
+          {isFeatureOn('finance') && <PaymentEditor key={appointment.id} appointment={appointment} />}
         </div>
 
         {appointment.status !== 'in-service' && appointment.status !== 'completed' && appointment.status !== 'cancelled' && (

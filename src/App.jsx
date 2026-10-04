@@ -14,6 +14,7 @@ import ManagerCalendar from './pages/manager/Calendar'
 import Staff from './pages/manager/Staff'
 import PublicPage from './pages/manager/PublicPage'
 import BusinessSettings from './pages/manager/Settings'
+import Finance from './pages/manager/Finance'
 
 export default function App() {
   const { pathname, hash } = useLocation()
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/manager/staff" element={<Staff />} />
           <Route path="/manager/public-page" element={<PublicPage />} />
           <Route path="/manager/settings" element={<BusinessSettings />} />
+          <Route path="/manager/finance" element={<Finance />} />
         </Routes>
       </main>
       {!isManager && <ClientBottomNav />}
