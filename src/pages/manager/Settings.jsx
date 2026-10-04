@@ -5,8 +5,10 @@ import { useData, serviceName, serviceDesc } from '../../context/DataContext'
 import { minutesToDuration } from '../../utils/date'
 import { THEME_PRESETS } from '../../themes'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
+import FeatureSettings from '../../components/manager/FeatureSettings'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import { formatShekels, parseShekelsToAgorot, agorotToInput } from '../../lib/money'
+import { normalizePhone } from '../../lib/phone'
 
 const EMPTY_SERVICE = { name: '', description: '', price: '', duration: '' }
 
@@ -132,6 +134,9 @@ export default function BusinessSettings() {
                     value={form.phone}
                     onChange={(e) => update({ phone: e.target.value })}
                   />
+                  {form.phone.trim() && !normalizePhone(form.phone) && (
+                    <p className="font-sans text-[12px] text-error">{t('contact.invalidPhone')}</p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1 md:col-span-2">
                   <label className="font-mono text-label-caps text-on-surface-variant">{t('Address')}</label>
@@ -144,6 +149,8 @@ export default function BusinessSettings() {
                 </div>
               </div>
             </div>
+
+            <FeatureSettings />
 
             <div className="bg-surface-container-lowest rounded-md p-6 shadow-card-client border border-outline-variant/30">
               <h2 className="font-sans text-headline-md text-primary mb-4 flex items-center gap-2">

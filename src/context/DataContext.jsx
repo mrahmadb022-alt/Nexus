@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { todayIso, addDaysIso } from '../lib/time'
+import { DEFAULT_FEATURES } from '../lib/features'
 
 const DataContext = createContext(null)
 
@@ -264,6 +265,9 @@ export function DataProvider({ children }) {
   const [perDayHours, setPerDayHours] = useState(DEFAULT_PER_DAY_HOURS)
   const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
   const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
+  // Kept out of businessSettings on purpose: the Settings page edits a local copy of
+  // businessSettings and writes the whole object back on Save, which would revert toggles.
+  const [features, setFeatures] = useState(DEFAULT_FEATURES)
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -376,6 +380,9 @@ export function DataProvider({ children }) {
 
   const getStaffById = (id) => staffList.find((s) => s.id === id)
 
+  const setFeature = (key, on) => setFeatures((prev) => ({ ...prev, [key]: on }))
+  const isFeatureOn = (key) => features[key] !== false
+
   const value = {
     appointments,
     gallery,
@@ -389,6 +396,7 @@ export function DataProvider({ children }) {
     businessSettings,
     clientProfile,
     draft,
+    features,
 
     setDraftService,
     setDraftStaff,
@@ -419,6 +427,8 @@ export function DataProvider({ children }) {
     updateBusinessSettings,
     updateClientProfile,
     getStaffById,
+    setFeature,
+    isFeatureOn,
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

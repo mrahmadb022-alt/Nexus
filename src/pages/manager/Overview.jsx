@@ -9,12 +9,15 @@ import { formatShekels } from '../../lib/money'
 import StatusPill from '../../components/StatusPill'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
+import ContactActions from '../../components/ContactActions'
+import { useBookingMessage } from '../../hooks/useBookingMessage'
 
 export default function ManagerOverview() {
   const { t, lang } = useLanguage()
   const navigate = useNavigate()
   const { appointments, waitlist, approveWaitlist, declineWaitlist, updateAppointmentStatus, services } = useData()
   const [detailsAppt, setDetailsAppt] = useState(null)
+  const bookingMessage = useBookingMessage()
 
   const todayIso = useMemo(() => todayInTz(), [])
   const todayLabel = useMemo(
@@ -145,6 +148,7 @@ export default function ManagerOverview() {
                         </div>
                         <div className="flex items-center gap-3">
                           <StatusPill status={appt.status} />
+                          <ContactActions variant="compact" phone={appt.clientPhone} message={bookingMessage('confirmation', appt)} />
                           <button
                             onClick={() => setDetailsAppt(appt)}
                             aria-label={t('Details')}

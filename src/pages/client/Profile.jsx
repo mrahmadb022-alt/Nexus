@@ -8,6 +8,9 @@ import StatusPill from '../../components/StatusPill'
 import RescheduleModal from '../../components/client/RescheduleModal'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import ContactActions from '../../components/ContactActions'
+import { useBookingMessage } from '../../hooks/useBookingMessage'
+import { normalizePhone } from '../../lib/phone'
 import { todayIso as todayInTz } from '../../lib/time'
 
 export default function Profile() {
@@ -24,7 +27,10 @@ export default function Profile() {
     clientProfile,
     updateClientProfile,
     services,
+    businessSettings,
+    isFeatureOn,
   } = useData()
+  const bookingMessage = useBookingMessage()
   const [rescheduling, setRescheduling] = useState(null)
   const [form, setForm] = useState(clientProfile)
   const [saved, setSaved] = useState(false)
@@ -88,6 +94,9 @@ export default function Profile() {
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               />
+              {isFeatureOn('contact') && form.phone.trim() && !normalizePhone(form.phone) && (
+                <p className="font-sans text-[12px] text-error">{t('contact.invalidPhone')}</p>
+              )}
             </div>
             <div className="flex flex-col gap-1 sm:col-span-2">
               <label className="font-mono text-label-caps text-on-surface-variant">
@@ -154,6 +163,11 @@ export default function Profile() {
                       <XCircle size={18} /> {t('Cancel')}
                     </button>
                   </div>
+                  <ContactActions
+                    variant="inline"
+                    phone={businessSettings.phone}
+                    message={bookingMessage('clientToBusiness', appt)}
+                  />
                 </div>
               )
             })}

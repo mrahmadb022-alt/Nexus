@@ -19,3 +19,14 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - "Today" and "now" come from `src/lib/time.js`, which reads the wall clock in Asia/Jerusalem. The old `new Date().toISOString().slice(0,10)` gave the UTC date, which is wrong after 21:00/22:00 Israel time.
 - `LOCALE_MAP` forces the Gregorian calendar and Western digits (`-u-ca-gregory-nu-latn`), because plain `ar` renders Arabic-Indic digits.
 - Demo seed phones were US numbers. They are now Israeli numbers in mixed formats, to exercise normalization.
+
+## Feature toggles
+- `src/lib/features.js` lists the features. Their state is a separate `features` slice in DataContext, not part of `businessSettings`. Settings edits a local copy of `businessSettings` and writes all of it back on Save, which would silently undo toggles.
+- Toggles apply immediately, like the theme picker. All features default to on.
+
+## 1. Contact
+- `src/lib/phone.js` is ported from booking-app. Unusable numbers return null, and the UI then hides the links (or explains why, in the details modal).
+- Manager side: full Call + WhatsApp buttons in the appointment details modal, and compact icon links on each row of today's schedule. The WhatsApp text is the localized confirmation, or the cancellation for cancelled bookings.
+- Client side: each upcoming booking has a "Contact the salon" Call/WhatsApp row using the business phone, with a localized "about my booking" text.
+- Messages use the language of whoever is acting in the UI right now. There is no per-client language yet. Times are always 24h (`14:00`).
+- Phone inputs (client profile, business settings) show a hint when the number can't be normalized.
