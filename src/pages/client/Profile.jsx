@@ -8,6 +8,7 @@ import StatusPill from '../../components/StatusPill'
 import RescheduleModal from '../../components/client/RescheduleModal'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 export default function Profile() {
   const { t, lang } = useLanguage()
@@ -35,7 +36,7 @@ export default function Profile() {
     }
   }, [location.hash])
 
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = todayInTz()
 
   const mine = appointments.filter((a) => a.clientId === MOCK_CLIENT_ID)
   const upcoming = mine

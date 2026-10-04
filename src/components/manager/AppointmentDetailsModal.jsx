@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useData, serviceName } from '../../context/DataContext'
 import { formatDateLong, formatTime, minutesToDuration } from '../../utils/date'
 import StatusPill from '../StatusPill'
+import { formatShekels } from '../../lib/money'
 
 export default function AppointmentDetailsModal({ appointment, onClose }) {
   const { t, lang } = useLanguage()
@@ -69,7 +70,7 @@ export default function AppointmentDetailsModal({ appointment, onClose }) {
               <Scissors size={18} className="shrink-0" />
               <span className="text-body-sm text-on-surface">
                 {serviceName(svc, t)}
-                {svc ? ` • ${minutesToDuration(svc.duration, t)} • ₪${svc.price}` : ''}
+                {svc ? ` • ${minutesToDuration(svc.duration, t)} • ${formatShekels(appointment.priceAgorot ?? svc.priceAgorot)}` : ''}
               </span>
             </div>
             <div className="flex items-center gap-3 text-on-surface-variant">

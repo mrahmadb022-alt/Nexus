@@ -6,6 +6,7 @@ import { minutesToDuration } from '../../utils/date'
 import { THEME_PRESETS } from '../../themes'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { formatShekels, parseShekelsToAgorot, agorotToInput } from '../../lib/money'
 
 const EMPTY_SERVICE = { name: '', description: '', price: '', duration: '' }
 
@@ -60,7 +61,7 @@ export default function BusinessSettings() {
     setServiceDraft({
       name: serviceName(svc, t),
       description: serviceDesc(svc, t),
-      price: svc.price,
+      price: agorotToInput(svc.priceAgorot),
       duration: svc.duration,
     })
     setShowServiceForm(true)
@@ -73,13 +74,14 @@ export default function BusinessSettings() {
   }
 
   const handleSaveService = guardSaveService(() => {
-    if (!serviceDraft.name.trim() || !serviceDraft.price || !serviceDraft.duration) return
+    const priceAgorot = parseShekelsToAgorot(serviceDraft.price)
+    if (!serviceDraft.name.trim() || priceAgorot === null || !serviceDraft.duration) return
     const patch = {
       name: serviceDraft.name.trim(),
       description: serviceDraft.description.trim(),
       nameKey: null,
       descKey: null,
-      price: Number(serviceDraft.price),
+      priceAgorot,
       duration: Number(serviceDraft.duration),
     }
     if (editingServiceId) {
@@ -287,6 +289,8 @@ export default function BusinessSettings() {
                       <input
                         type="number"
                         min="0"
+                        step="0.01"
+                        inputMode="decimal"
                         value={serviceDraft.price}
                         onChange={(e) => setServiceDraft((s) => ({ ...s, price: e.target.value }))}
                         className="input-field"
@@ -324,7 +328,7 @@ export default function BusinessSettings() {
                       <h3 className="font-sans text-base text-on-surface">{serviceName(svc, t)}</h3>
                       <p className="font-sans text-body-sm text-on-surface-variant truncate">{serviceDesc(svc, t)}</p>
                       <p className="font-mono text-label-caps text-on-surface-variant mt-1">
-                        ₪{svc.price} • {minutesToDuration(svc.duration, t)}
+                        {formatShekels(svc.priceAgorot)} • {minutesToDuration(svc.duration, t)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

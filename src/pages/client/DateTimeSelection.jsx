@@ -6,6 +6,7 @@ import { useData, MOCK_CLIENT_ID } from '../../context/DataContext'
 import { formatDateLong, formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -19,11 +20,9 @@ export default function DateTimeSelection() {
     if (!draft.serviceId) navigate('/services', { replace: true })
   }, [draft.serviceId])
 
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
+  // Local-midnight Date of *Jerusalem's* today, so the calendar grid's past/today split
+  // follows the business clock even on a device set to another timezone.
+  const today = useMemo(() => new Date(todayInTz() + 'T00:00:00'), [])
 
   const [viewMonth, setViewMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState(draft.date || toISODate(today))

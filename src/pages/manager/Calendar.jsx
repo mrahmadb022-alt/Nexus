@@ -7,6 +7,7 @@ import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import DayViewModal from '../../components/manager/DayViewModal'
 import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
 import AvailableSlotsModal from '../../components/manager/AvailableSlotsModal'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const MINUTES = ['00', '15', '30', '45']
@@ -52,14 +53,14 @@ export default function ManagerCalendar() {
   const [availDate, setAvailDate] = useState(null)
   const [detailsAppt, setDetailsAppt] = useState(null)
 
-  const weekStart = useMemo(() => addDays(startOfWeek(new Date()), weekOffset * 7), [weekOffset])
+  const weekStart = useMemo(() => addDays(startOfWeek(new Date(todayInTz() + 'T00:00:00')), weekOffset * 7), [weekOffset])
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
   const weekEnd = weekDates[6]
 
   const PrevIcon = isRtl ? ChevronRight : ChevronLeft
   const NextIcon = isRtl ? ChevronLeft : ChevronRight
 
-  const todayIso = toISODate(new Date())
+  const todayIso = todayInTz()
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

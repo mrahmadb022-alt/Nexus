@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { addDays, toISODate } from '../utils/date'
+import { todayIso, addDaysIso } from '../lib/time'
 
 const DataContext = createContext(null)
 
 export const MOCK_CLIENT_ID = 'you'
 
-const today = new Date()
-const iso = (offset) => toISODate(addDays(today, offset))
+// Seed dates are relative to today in Asia/Jerusalem (the business clock), not the device's zone.
+const iso = (offset) => addDaysIso(todayIso(), offset)
 
 // Collision-resistant client-generated IDs (not timestamp-based) — two records created in the
 // same millisecond, e.g. from a rapid double-tap slipping past the submit guard, must never
@@ -22,7 +22,7 @@ const INITIAL_SERVICES = [
     id: 'svc-haircut',
     nameKey: 'svc.haircut.name',
     descKey: 'svc.haircut.desc',
-    price: 65,
+    priceAgorot: 6500,
     duration: 45,
     image: 'https://picsum.photos/seed/nexus-haircut/400/400',
   },
@@ -30,7 +30,7 @@ const INITIAL_SERVICES = [
     id: 'svc-balayage',
     nameKey: 'svc.balayage.name',
     descKey: 'svc.balayage.desc',
-    price: 185,
+    priceAgorot: 18500,
     duration: 150,
     image: 'https://picsum.photos/seed/nexus-balayage/400/400',
   },
@@ -38,7 +38,7 @@ const INITIAL_SERVICES = [
     id: 'svc-treatment',
     nameKey: 'svc.treatment.name',
     descKey: 'svc.treatment.desc',
-    price: 45,
+    priceAgorot: 4500,
     duration: 30,
     image: 'https://picsum.photos/seed/nexus-treatment/400/400',
   },
@@ -46,7 +46,7 @@ const INITIAL_SERVICES = [
     id: 'svc-bridal',
     nameKey: 'svc.bridal.name',
     descKey: 'svc.bridal.desc',
-    price: 220,
+    priceAgorot: 22000,
     duration: 90,
     image: 'https://picsum.photos/seed/nexus-bridal/400/400',
   },
@@ -54,7 +54,7 @@ const INITIAL_SERVICES = [
     id: 'svc-beard',
     nameKey: 'svc.beard.name',
     descKey: 'svc.beard.desc',
-    price: 35,
+    priceAgorot: 3500,
     duration: 20,
     image: 'https://picsum.photos/seed/nexus-beard/400/400',
   },
@@ -62,7 +62,7 @@ const INITIAL_SERVICES = [
     id: 'svc-manicure',
     nameKey: 'svc.manicure.name',
     descKey: 'svc.manicure.desc',
-    price: 55,
+    priceAgorot: 5500,
     duration: 40,
     image: 'https://picsum.photos/seed/nexus-manicure/400/400',
   },
@@ -132,7 +132,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
-    clientPhone: '+1 (555) 010-1142',
+    clientPhone: '054-123-4567',
     clientEmail: 'you@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-sarah',
@@ -145,7 +145,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
-    clientPhone: '+1 (555) 201-4488',
+    clientPhone: '054-123-4567',
     clientEmail: 'you@example.com',
     serviceId: 'svc-treatment',
     staffId: 'staff-elena',
@@ -158,7 +158,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-marcus',
     clientName: 'Marcus Johnson',
     initials: 'MJ',
-    clientPhone: '+1 (555) 233-7710',
+    clientPhone: '0527654321',
     clientEmail: 'marcus.johnson@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-marcus',
@@ -171,7 +171,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-emma',
     clientName: 'Emma Lawson',
     initials: 'EL',
-    clientPhone: '+1 (555) 448-2291',
+    clientPhone: '+972 50-555-1234',
     clientEmail: 'emma.lawson@example.com',
     serviceId: 'svc-balayage',
     staffId: 'staff-david',
@@ -184,7 +184,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-tom',
     clientName: 'Tom Richards',
     initials: 'TR',
-    clientPhone: '+1 (555) 672-0143',
+    clientPhone: '+972541112233',
     clientEmail: 'tom.richards@example.com',
     serviceId: 'svc-beard',
     staffId: 'staff-marcus',
@@ -199,7 +199,7 @@ const INITIAL_WAITLIST = [
     id: 'w1',
     clientId: 'c-amanda',
     clientName: 'Amanda Lee',
-    clientPhone: '+1 (555) 391-6620',
+    clientPhone: '053 444 5566',
     date: iso(2),
     note: 'Any cut before 4PM',
     createdAt: Date.now() - 10 * 60000,
@@ -208,7 +208,7 @@ const INITIAL_WAITLIST = [
     id: 'w2',
     clientId: 'c-david2',
     clientName: 'David Chen',
-    clientPhone: '+1 (555) 807-2254',
+    clientPhone: '058-777-8899',
     date: iso(1),
     note: 'Color touch-up (urgent)',
     createdAt: Date.now() - 60 * 60000,
@@ -228,7 +228,7 @@ const DEFAULT_PER_DAY_HOURS = {
 const DEFAULT_BUSINESS_SETTINGS = {
   name: 'Nexus Salon - Main St',
   email: 'hello@nexusbooking.com',
-  phone: '+1 (555) 123-4567',
+  phone: '03-555-1234',
   address: '123 Main Street, Suite 200\nMetropolis, NY 10001',
   timezone: 'est',
   heroBackground: 'https://picsum.photos/seed/nexus-hero-bg/1600/900',
@@ -339,7 +339,7 @@ export function DataProvider({ children }) {
       initials: initialsFromName(name),
       rating,
       text,
-      date: toISODate(new Date()),
+      date: todayIso(),
     }
     setReviews((prev) => [review, ...prev])
     return review

@@ -5,6 +5,7 @@ import { useData } from '../../context/DataContext'
 import { formatDateLong } from '../../utils/date'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const TABS = [
   { id: 'content', label: 'Announcements & Offers', icon: Megaphone },
@@ -34,7 +35,7 @@ export default function PublicPage() {
   const [savingAnn, guardSaveAnn] = useSubmitGuard()
   const [savingOffer, guardSaveOffer] = useSubmitGuard()
 
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = todayInTz()
 
   const saveAnnouncement = guardSaveAnn(() => {
     if (!annDraft.title.trim()) return

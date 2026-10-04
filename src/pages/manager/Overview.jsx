@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { BellRing, Armchair, MoreVertical, Hourglass, Check, X, Plus } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData, serviceName } from '../../context/DataContext'
-import { formatDateLong, formatTime, minutesAgoLabel, minutesToDuration } from '../../utils/date'
+import { formatDateLong, formatTime, minutesAgoLabel, minutesToDuration, LOCALE_MAP } from '../../utils/date'
+import { todayIso as todayInTz, BUSINESS_TZ } from '../../lib/time'
+import { formatShekels } from '../../lib/money'
 import StatusPill from '../../components/StatusPill'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import AppointmentDetailsModal from '../../components/manager/AppointmentDetailsModal'
@@ -14,9 +16,10 @@ export default function ManagerOverview() {
   const { appointments, waitlist, approveWaitlist, declineWaitlist, updateAppointmentStatus, services } = useData()
   const [detailsAppt, setDetailsAppt] = useState(null)
 
-  const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const todayIso = useMemo(() => todayInTz(), [])
   const todayLabel = useMemo(
-    () => new Date().toLocaleDateString(lang === 'en' ? 'en-US' : lang === 'he' ? 'he-IL' : 'ar', {
+    () => new Date().toLocaleDateString(LOCALE_MAP[lang] || 'en-US', {
+      timeZone: BUSINESS_TZ,
       weekday: 'long',
       month: 'short',
       day: 'numeric',
@@ -32,7 +35,7 @@ export default function ManagerOverview() {
 
   const revenueToday = todayAppointments.reduce((sum, a) => {
     const svc = services.find((s) => s.id === a.serviceId)
-    return a.status === 'cancelled' ? sum : sum + (svc?.price || 0)
+    return a.status === 'cancelled' ? sum : sum + (a.priceAgorot ?? svc?.priceAgorot ?? 0)
   }, 0)
 
   const clientsToday = new Set(todayAppointments.map((a) => a.clientId)).size
@@ -162,7 +165,7 @@ export default function ManagerOverview() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
                 <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Revenue Today')}</p>
-                <p className="font-sans text-display-lg-mobile text-on-background">₪{revenueToday}</p>
+                <p className="font-sans text-display-lg-mobile text-on-background">{formatShekels(revenueToday)}</p>
               </div>
               <div className="bg-surface border border-outline-variant rounded-md p-4 shadow-sm">
                 <p className="font-mono text-label-caps text-on-surface-variant mb-2">{t('Clients Today')}</p>

@@ -6,6 +6,7 @@ import { useData, serviceName } from '../../context/DataContext'
 import { formatDateFull, formatTime } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { formatShekels } from '../../lib/money'
 
 export default function Confirmation() {
   const { t, lang, isRtl } = useLanguage()
@@ -106,7 +107,7 @@ export default function Confirmation() {
               </div>
               <div className="md:text-end flex flex-col gap-1 md:shrink-0 border-t md:border-t-0 md:border-s border-outline-variant pt-4 md:pt-0 md:ps-6">
                 <span className="font-mono text-label-caps text-on-surface-variant">{t('Total')}</span>
-                <span className="font-sans text-display-lg-mobile text-primary">₪{service.price}</span>
+                <span className="font-sans text-display-lg-mobile text-primary">{formatShekels(service.priceAgorot)}</span>
               </div>
             </div>
 

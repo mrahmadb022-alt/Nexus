@@ -18,7 +18,8 @@ export function startOfWeek(date) {
   return addDays(d, -day)
 }
 
-const LOCALE_MAP = { en: 'en-US', he: 'he-IL', ar: 'ar' }
+// Gregorian calendar + Western (latn) digits in every language — plain 'ar' renders Arabic-Indic digits.
+export const LOCALE_MAP = { en: 'en-US', he: 'he-IL-u-ca-gregory-nu-latn', ar: 'ar-u-ca-gregory-nu-latn' }
 
 export function formatDateLong(isoDate, lang) {
   const d = new Date(isoDate + 'T00:00:00')

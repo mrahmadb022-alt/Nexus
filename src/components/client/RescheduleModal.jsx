@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 import { formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -26,11 +27,9 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
+  // Local-midnight Date of *Jerusalem's* today, so the calendar grid's past/today split
+  // follows the business clock even on a device set to another timezone.
+  const today = useMemo(() => new Date(todayInTz() + 'T00:00:00'), [])
 
   const initialDate = new Date(appointment.date + 'T00:00:00')
   const [viewMonth, setViewMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1))
