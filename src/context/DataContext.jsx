@@ -5,6 +5,7 @@ import { buildSeedHistory } from './seedHistory'
 import { useLanguage } from './LanguageContext'
 import { bookingMessageVars, renderBookingMessage } from '../lib/messages'
 import { canIssueConfirmation, nextConfirmationNumber } from '../lib/receipts'
+import { freeStaffForSlot, hasConflict } from '../lib/availability'
 
 const DataContext = createContext(null)
 
@@ -372,7 +373,25 @@ export function DataProvider({ children }) {
 
   const updateMessagingSettings = (patch) => setMessagingSettings((prev) => ({ ...prev, ...patch }))
 
+  // Re-checks the slot at confirm time (it may have been taken since it was shown) and, for
+  // "any available", assigns the least busy free staff member. Returns null if the slot is gone.
   const confirmDraftBooking = () => {
+    const durationMinutes = services.find((s) => s.id === draft.serviceId)?.duration ?? 30
+    const slot = { date: draft.date, time: draft.time, durationMinutes, bookings: appointments }
+    let staffId = draft.staffId ?? null
+    let autoAssigned = false
+    if (features.staffAvailability !== false) {
+      if (!staffId) {
+        const free = freeStaffForSlot({ ...slot, staffIds: staffList.map((s) => s.id) })
+        if (!free.length) return null
+        staffId = free[0]
+        autoAssigned = true
+      } else if (hasConflict({ ...slot, staffId })) {
+        return null
+      }
+    } else if (hasConflict(slot)) {
+      return null
+    }
     const newAppt = withBookingDefaults({
       id: newId('apt'),
       clientId: MOCK_CLIENT_ID,
@@ -381,7 +400,8 @@ export function DataProvider({ children }) {
       clientPhone: clientProfile.phone || '',
       clientEmail: clientProfile.email || '',
       serviceId: draft.serviceId,
-      staffId: draft.staffId,
+      staffId,
+      autoAssigned,
       date: draft.date,
       time: draft.time,
       status: 'confirmed',

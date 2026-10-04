@@ -557,7 +557,41 @@ const marketing = {
   },
 }
 
-const GROUPS = [general, contact, finance, messaging, calendar, receipts, marketing]
+const staff = {
+  en: {
+    'feature.staffAvailability.name': 'Per-staff availability',
+    'feature.staffAvailability.desc':
+      'Each professional has their own calendar, and "Any available" picks whoever is free. When off, every booking blocks the slot for everyone.',
+    'staff.availabilityFor': "Showing {name}'s free times.",
+    'staff.availabilityAny': 'Showing times when any professional is free.',
+    'staff.anyAssigned': "Any available: we'll assign whoever is free at this time.",
+    'staff.assignedTo': 'Your professional: {name}',
+    'staff.slotTaken': 'Sorry, this time was just taken. Please choose another time.',
+    'staff.pickAnother': 'Choose another time',
+  },
+  he: {
+    'feature.staffAvailability.name': 'זמינות לפי איש צוות',
+    'feature.staffAvailability.desc': 'לכל איש צוות יומן משלו, ו"כל הזמין" בוחר מי שפנוי. כשכבוי, כל תור חוסם את השעה לכולם.',
+    'staff.availabilityFor': 'מוצגות השעות הפנויות של {name}.',
+    'staff.availabilityAny': 'מוצגות שעות שבהן מישהו מהצוות פנוי.',
+    'staff.anyAssigned': 'כל הזמין: נשבץ את מי שפנוי בשעה הזו.',
+    'staff.assignedTo': 'איש הצוות שלך: {name}',
+    'staff.slotTaken': 'מצטערים, השעה הזו נתפסה הרגע. נא לבחור שעה אחרת.',
+    'staff.pickAnother': 'בחירת שעה אחרת',
+  },
+  ar: {
+    'feature.staffAvailability.name': 'التوفر لكل موظف',
+    'feature.staffAvailability.desc': 'لكل موظف تقويمه الخاص، و"أي متاح" يختار من هو متفرغ. عند الإيقاف، يحجز كل موعد الوقت للجميع.',
+    'staff.availabilityFor': 'تُعرض الأوقات المتاحة لـ{name}.',
+    'staff.availabilityAny': 'تُعرض الأوقات التي يتفرغ فيها أي موظف.',
+    'staff.anyAssigned': 'أي متاح: سنعيّن من يكون متفرغاً في هذا الوقت.',
+    'staff.assignedTo': 'الموظف الخاص بك: {name}',
+    'staff.slotTaken': 'عذراً، تم حجز هذا الوقت للتو. يرجى اختيار وقت آخر.',
+    'staff.pickAnother': 'اختيار وقت آخر',
+  },
+}
+
+const GROUPS = [general, contact, finance, messaging, calendar, receipts, marketing, staff]
 
 export const featureTranslations = Object.fromEntries(
   ['en', 'he', 'ar'].map((lang) => [lang, Object.assign({}, ...GROUPS.map((g) => g[lang]))]),

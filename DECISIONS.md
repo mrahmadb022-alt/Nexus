@@ -64,3 +64,13 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - The campaign composer is on the Messages page, since campaigns go to the message log only. The audience is clients whose consent is true, counted once each (`consentedRecipients`).
 - The ad prefix is hardcoded in `src/lib/marketing.js`, not in translations, so the exact characters can't drift. `פרסומת` starts with U+05E4, and a unit test checks it. The prefix follows the composer's current language (פרסומת / إعلان / Ad), then come the business name, the body, and a localized opt-out line ("reply STOP / הסר / إيقاف"). None of these can be removed in the composer. A real unsubscribe link needs a backend.
 - Seed clients have mixed consent, so the audience count isn't trivial (5 of 8).
+
+## 7. Per-staff availability
+- Before this, a slot was blocked by any booking with the same start time, for every staff member, and service duration was ignored. `src/lib/availability.js` (adapted from booking-app) now checks duration-aware interval overlap per staff member. "Any available" (the existing "No preference" / "Any Available" choices) is the union over all staff. Slots must finish before closing time, and today's slots that already started are skipped, using the Jerusalem clock.
+- At confirm time, DataContext re-checks the slot (`hasConflict`). For "any available" it assigns the least busy free staff member (`freeStaffForSlot`, marked `autoAssigned`). If the slot was taken in the meantime, the confirmation step says so and links back to choose another time; nothing is saved.
+- Rescheduling uses the same staff member and the booking's own duration, and the booking's current slot doesn't block itself. The manager's "Available Slots" modal shows 30-minute openings where anyone is free.
+- With the toggle off, there is one shared calendar: every booking blocks the slot for everyone, still duration-aware.
+
+## Testing
+- Vitest: `src/**/*.test.js` covers phone, money, time, finance, CSV/BOM, XLSX, datasets, ICS, messages, receipts, marketing, availability, and translation key parity across en/he/ar.
+- Playwright (`tests/e2e`, pinned to 1.63.0) runs at 375px with the Jerusalem timezone. It books through the full flow in Hebrew, and sweeps manager pages in Arabic for horizontal overflow and nested interactive elements. It starts its own Vite server on port 5174.

@@ -8,6 +8,7 @@ export const FEATURES = [
   { key: 'calendar', nameKey: 'feature.calendar.name', descKey: 'feature.calendar.desc' },
   { key: 'receipts', nameKey: 'feature.receipts.name', descKey: 'feature.receipts.desc' },
   { key: 'marketing', nameKey: 'feature.marketing.name', descKey: 'feature.marketing.desc' },
+  { key: 'staffAvailability', nameKey: 'feature.staffAvailability.name', descKey: 'feature.staffAvailability.desc' },
 ]
 
 export const DEFAULT_FEATURES = Object.fromEntries(FEATURES.map((f) => [f.key, true]))
