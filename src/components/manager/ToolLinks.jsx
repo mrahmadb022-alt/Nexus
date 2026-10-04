@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight, ChevronLeft, Wallet } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Wallet, MessagesSquare } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 
 // Shortcuts to the roadmap tool pages. The mobile bottom nav is already full at 375px (five
 // tabs), so on phones these cards on the dashboard are the way in; the desktop sidebar lists
 // them as well.
-const TOOLS = [{ to: '/manager/finance', icon: Wallet, labelKey: 'nav.finance', descKey: 'tools.finance.desc', feature: 'finance' }]
+const TOOLS = [
+  { to: '/manager/finance', icon: Wallet, labelKey: 'nav.finance', descKey: 'tools.finance.desc', feature: 'finance' },
+  { to: '/manager/messages', icon: MessagesSquare, labelKey: 'nav.messages', descKey: 'tools.messages.desc', feature: 'messaging' },
+]
 
 export default function ToolLinks() {
   const { t, isRtl } = useLanguage()

@@ -1,6 +1,8 @@
 // Message bodies for WhatsApp links and the (simulated) automated-message log. Pure: callers pass
 // the translation function, so every language stays in sync with translations.features.js.
 
+import { zonedTimeToUtc } from './time'
+
 export const MESSAGE_KINDS = ['confirmation', 'reminder', 'cancellation']
 
 const INTL_LOCALE = { en: 'en-US', he: 'he-IL', ar: 'ar' }
@@ -38,8 +40,18 @@ export function renderBookingMessage(kind, vars, t) {
   return interpolate(t(`msg.${kind}`), vars)
 }
 
-/** Hours before the appointment a reminder would go out; null if the booking has no future start. */
-export function reminderSendTime(startMs, hoursBefore) {
-  if (!Number.isFinite(startMs)) return null
-  return startMs - hoursBefore * 60 * 60 * 1000
+/**
+ * Reminders that would be scheduled for upcoming bookings: one per active booking that hasn't
+ * started, sent `hoursBefore` hours ahead (or right away when the booking is already inside that
+ * window). Sorted by send time.
+ */
+export function scheduledReminders(appointments, { hoursBefore, now = Date.now() }) {
+  return appointments
+    .filter((a) => a.status === 'confirmed' || a.status === 'pending')
+    .map((a) => {
+      const startMs = zonedTimeToUtc(a.date, a.time).getTime()
+      return { appointment: a, startMs, sendAtMs: Math.max(now, startMs - hoursBefore * 3600000) }
+    })
+    .filter((r) => r.startMs > now)
+    .sort((x, y) => x.sendAtMs - y.sendAtMs || x.startMs - y.startMs)
 }

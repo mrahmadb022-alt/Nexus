@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bookingMessageVars, formatMessageDate, interpolate, renderBookingMessage } from './messages'
+import { bookingMessageVars, formatMessageDate, interpolate, renderBookingMessage, scheduledReminders } from './messages'
 import { featureTranslations } from '../translations.features'
 
 const tFor = (lang) => (key) => featureTranslations[lang][key] ?? key
@@ -32,5 +32,23 @@ describe('message templates', () => {
     expect(he).toContain('Dana')
     expect(he).toContain('14:00')
     expect(he).not.toMatch(/\{\w+\}/)
+  })
+})
+
+describe('scheduledReminders', () => {
+  const now = Date.parse('2026-10-05T09:00:00Z') // 12:00 in Jerusalem
+  const appts = [
+    { id: 'a', status: 'confirmed', date: '2026-10-07', time: '10:00' },
+    { id: 'b', status: 'confirmed', date: '2026-10-05', time: '15:00' }, // inside the 24h window
+    { id: 'c', status: 'cancelled', date: '2026-10-08', time: '10:00' },
+    { id: 'd', status: 'completed', date: '2026-10-08', time: '10:00' },
+    { id: 'e', status: 'pending', date: '2026-10-05', time: '11:00' }, // already started
+  ]
+
+  it('schedules active future bookings hoursBefore their start, in Jerusalem time', () => {
+    const r = scheduledReminders(appts, { hoursBefore: 24, now })
+    expect(r.map((x) => x.appointment.id)).toEqual(['b', 'a'])
+    expect(new Date(r[0].sendAtMs).toISOString()).toBe('2026-10-05T09:00:00.000Z') // due now
+    expect(new Date(r[1].sendAtMs).toISOString()).toBe('2026-10-06T07:00:00.000Z') // 10:00 IDT − 24h
   })
 })

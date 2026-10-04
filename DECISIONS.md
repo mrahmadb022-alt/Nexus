@@ -40,3 +40,11 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - Charts are plain HTML/flex, so RTL mirrors automatically. The two-series trend uses fixed blue/orange tokens (`--viz-income`, `--viz-expense`), checked with the dataviz palette validator on light and dark surfaces. The theme primary/secondary pairs failed the CVD checks on dark themes. Single-series bar lists use the theme primary. The trend chart has a hover/focus tooltip and a table view.
 - Exports: CSV has a UTF-8 BOM, CRLF line endings, and formula-injection guarding. XLSX uses a minimal writer on `fflate` (the only new runtime dependency) and is right-to-left for he/ar. Headers follow the current language. Money is exported in shekels with 2 decimals.
 - Navigation: at 375px the bottom nav already has five tabs, so tool pages are reached from cards on the dashboard (`ToolLinks`) plus links in the desktop sidebar.
+
+## 3. Automated messages (simulated)
+- Nothing is sent. DataContext keeps a `messageLog` of what would be sent. A booking confirmation (client flow) and a cancellation (client cancel, or a manager setting payment to "cancelled") log automatically when their switch is on. "Send demo reminder" logs a reminder for the next upcoming appointment.
+- Real sending happens only through each entry's WhatsApp link (wa.me with the same text).
+- Settings for confirmation/reminder/cancellation, and reminder timing (2/3/12/24/48 hours before), live on the Messages page. The on/off for the whole feature is in Settings → Features.
+- Scheduled reminders are computed, not stored (`scheduledReminders` in `src/lib/messages.js`): active future bookings, sent N hours before their start on the Jerusalem clock, or immediately if the booking is already inside that window.
+- Message text uses the language of the person acting at that moment. The two seeded log entries render in the current UI language.
+- The page shows the badge "Demo mode, connects after backend setup" (translated).

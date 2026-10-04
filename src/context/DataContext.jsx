@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { todayIso, addDaysIso } from '../lib/time'
 import { DEFAULT_FEATURES } from '../lib/features'
 import { buildSeedHistory } from './seedHistory'
+import { useLanguage } from './LanguageContext'
+import { bookingMessageVars, renderBookingMessage } from '../lib/messages'
 
 const DataContext = createContext(null)
 
@@ -218,6 +220,15 @@ const SEEDED_APPOINTMENTS = [...SEED_HISTORY.bookings, ...INITIAL_APPOINTMENTS].
   withBookingDefaults(a, INITIAL_SERVICES),
 )
 
+const DEFAULT_MESSAGING_SETTINGS = { confirmation: true, reminder: true, cancellation: true, reminderHours: 24 }
+
+// A couple of entries so the (simulated) message log isn't empty on first open. `body: null`
+// means "render in the current language when shown"; live entries store the text they'd send.
+const INITIAL_MESSAGE_LOG = [
+  { id: 'msg-seed-1', kind: 'confirmation', appointmentId: 'apt-5', createdAt: Date.now() - 26 * 3600000, body: null },
+  { id: 'msg-seed-2', kind: 'confirmation', appointmentId: 'apt-3', createdAt: Date.now() - 3 * 3600000, body: null },
+]
+
 const INITIAL_WAITLIST = [
   {
     id: 'w1',
@@ -292,6 +303,9 @@ export function DataProvider({ children }) {
   // businessSettings and writes the whole object back on Save, which would revert toggles.
   const [features, setFeatures] = useState(DEFAULT_FEATURES)
   const [expenses, setExpenses] = useState(SEED_HISTORY.expenses)
+  const [messagingSettings, setMessagingSettings] = useState(DEFAULT_MESSAGING_SETTINGS)
+  const [messageLog, setMessageLog] = useState(INITIAL_MESSAGE_LOG)
+  const { t, lang } = useLanguage()
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -315,6 +329,35 @@ export function DataProvider({ children }) {
   const setDraftDateTime = (date, time) => setDraft((d) => ({ ...d, date, time }))
   const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null })
 
+  // --- Simulated automated messages -------------------------------------------------------
+  // Nothing is actually sent: entries record what *would* go out once a messaging backend is
+  // connected. The manager can still send any of them by hand through its WhatsApp link.
+  const renderMessage = (kind, appt) => {
+    const svc = services.find((s) => s.id === appt.serviceId)
+    const serviceLabel = svc ? (svc.nameKey ? t(svc.nameKey) : svc.name || '') : ''
+    return renderBookingMessage(kind, bookingMessageVars({ appointment: appt, businessName: businessSettings.name, serviceLabel, lang }), t)
+  }
+
+  const logMessage = (entry) =>
+    setMessageLog((prev) => [{ id: newId('msg'), createdAt: Date.now(), lang, ...entry }, ...prev])
+
+  // Automatic kinds respect the feature toggle and their own switch; manual sends (demo
+  // reminder) only need the feature on.
+  const logBookingMessage = (kind, appt, { manual = false } = {}) => {
+    if (features.messaging === false) return
+    if (!manual && !messagingSettings[kind]) return
+    logMessage({
+      kind,
+      appointmentId: appt.id,
+      clientName: appt.clientName,
+      phone: appt.clientPhone,
+      body: renderMessage(kind, appt),
+      manual,
+    })
+  }
+
+  const updateMessagingSettings = (patch) => setMessagingSettings((prev) => ({ ...prev, ...patch }))
+
   const confirmDraftBooking = () => {
     const newAppt = withBookingDefaults({
       id: newId('apt'),
@@ -331,10 +374,13 @@ export function DataProvider({ children }) {
       createdAt: Date.now(),
     }, services)
     setAppointments((prev) => [...prev, newAppt])
+    logBookingMessage('confirmation', newAppt)
     return newAppt
   }
 
-  const cancelAppointment = (id) =>
+  const cancelAppointment = (id) => {
+    const appt = appointments.find((a) => a.id === id)
+    if (appt && appt.status !== 'cancelled') logBookingMessage('cancellation', appt)
     setAppointments((prev) =>
       prev.map((a) =>
         a.id === id
@@ -342,10 +388,13 @@ export function DataProvider({ children }) {
           : a,
       ),
     )
+  }
 
   // Payment status/method/amount for one booking. Marking it cancelled also cancels the
   // booking; un-cancelling a payment puts a cancelled booking back to confirmed.
-  const recordPayment = (id, { paymentStatus, paymentMethod, amountPaidAgorot }) =>
+  const recordPayment = (id, { paymentStatus, paymentMethod, amountPaidAgorot }) => {
+    const appt = appointments.find((a) => a.id === id)
+    if (appt && paymentStatus === 'cancelled' && appt.status !== 'cancelled') logBookingMessage('cancellation', appt)
     setAppointments((prev) =>
       prev.map((a) => {
         if (a.id !== id) return a
@@ -362,6 +411,7 @@ export function DataProvider({ children }) {
         }
       }),
     )
+  }
 
   const addExpense = (expense) => setExpenses((prev) => [{ id: newId('exp'), note: '', ...expense }, ...prev])
   const updateExpense = (id, patch) =>
@@ -466,6 +516,8 @@ export function DataProvider({ children }) {
     draft,
     features,
     expenses,
+    messagingSettings,
+    messageLog,
 
     setDraftService,
     setDraftStaff,
@@ -474,6 +526,10 @@ export function DataProvider({ children }) {
     confirmDraftBooking,
     cancelAppointment,
     recordPayment,
+    logBookingMessage,
+    logMessage,
+    renderMessage,
+    updateMessagingSettings,
     addExpense,
     updateExpense,
     removeExpense,

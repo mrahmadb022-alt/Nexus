@@ -7,7 +7,7 @@ Resume from here after /clear. Spec: ROADMAP.md. Decisions: DECISIONS.md.
 | 0 | Locate Nexus, branch, ROADMAP.md, groundwork (Vitest, Jerusalem time, agorot) | done |
 | 1 | Contact: phone normalization, Call + WhatsApp | done |
 | 2 | Payments + finance dashboard + CSV/XLSX | done |
-| 3 | Automated messages (simulated) + log | todo |
+| 3 | Automated messages (simulated) + log | done |
 | 4 | Calendar: .ics + Google link + export all | todo |
 | 5 | Receipts (demo) | todo |
 | 6 | Marketing consent + campaign composer | todo |

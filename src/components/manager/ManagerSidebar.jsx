@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, IdCard, Megaphone, Settings, ArrowLeftRight, Wallet } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, IdCard, Megaphone, Settings, ArrowLeftRight, Wallet, MessagesSquare } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 import LanguageSwitcher from '../LanguageSwitcher'
@@ -10,6 +10,7 @@ const LINKS = [
   { to: '/manager/staff', icon: IdCard, label: 'Staff' },
   { to: '/manager/public-page', icon: Megaphone, label: 'Public Page' },
   { to: '/manager/finance', icon: Wallet, label: 'nav.finance', feature: 'finance' },
+  { to: '/manager/messages', icon: MessagesSquare, label: 'nav.messages', feature: 'messaging' },
   { to: '/manager/settings', icon: Settings, label: 'Settings' },
 ]
 
