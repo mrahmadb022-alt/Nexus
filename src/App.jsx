@@ -16,6 +16,7 @@ import PublicPage from './pages/manager/PublicPage'
 import BusinessSettings from './pages/manager/Settings'
 import Finance from './pages/manager/Finance'
 import Messages from './pages/manager/Messages'
+import PaymentConfirmation from './pages/manager/PaymentConfirmation'
 
 export default function App() {
   const { pathname, hash } = useLocation()
@@ -25,11 +26,13 @@ export default function App() {
   }, [pathname, hash])
 
   const isManager = pathname.startsWith('/manager')
+  // The printable payment confirmation is a standalone document: no app navigation around it.
+  const isDocument = pathname.startsWith('/manager/confirmation/')
 
   return (
     <div className="min-h-screen bg-background text-on-background flex flex-col md:flex-row">
-      {isManager && <ManagerSidebar />}
-      <main className={`flex-1 min-w-0 ${isManager ? 'pb-24 lg:pb-0' : 'pb-24 md:pb-0'}`}>
+      {isManager && !isDocument && <ManagerSidebar />}
+      <main className={`flex-1 min-w-0 ${isDocument ? '' : isManager ? 'pb-24 lg:pb-0' : 'pb-24 md:pb-0'}`}>
         <Routes key={pathname}>
           <Route path="/" element={<Landing />} />
           <Route path="/services" element={<ServiceSelection />} />
@@ -44,10 +47,11 @@ export default function App() {
           <Route path="/manager/settings" element={<BusinessSettings />} />
           <Route path="/manager/finance" element={<Finance />} />
           <Route path="/manager/messages" element={<Messages />} />
+          <Route path="/manager/confirmation/:id" element={<PaymentConfirmation />} />
         </Routes>
       </main>
       {!isManager && <ClientBottomNav />}
-      {isManager && <ManagerBottomNav />}
+      {isManager && !isDocument && <ManagerBottomNav />}
     </div>
   )
 }

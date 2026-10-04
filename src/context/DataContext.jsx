@@ -4,6 +4,7 @@ import { DEFAULT_FEATURES } from '../lib/features'
 import { buildSeedHistory } from './seedHistory'
 import { useLanguage } from './LanguageContext'
 import { bookingMessageVars, renderBookingMessage } from '../lib/messages'
+import { canIssueConfirmation, nextConfirmationNumber } from '../lib/receipts'
 
 const DataContext = createContext(null)
 
@@ -306,6 +307,8 @@ export function DataProvider({ children }) {
   const [messagingSettings, setMessagingSettings] = useState(DEFAULT_MESSAGING_SETTINGS)
   const [messageLog, setMessageLog] = useState(INITIAL_MESSAGE_LOG)
   const { t, lang } = useLanguage()
+  const [receiptSettings, setReceiptSettings] = useState({ businessType: 'exempt' })
+  const [confirmations, setConfirmations] = useState([])
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -413,6 +416,30 @@ export function DataProvider({ children }) {
     )
   }
 
+  // Demo payment confirmation (NOT a tax document). One per booking: issuing again returns the
+  // existing one, so a number is never spent twice on the same payment.
+  const issueConfirmation = (appointmentId) => {
+    const existing = confirmations.find((c) => c.appointmentId === appointmentId)
+    if (existing) return existing
+    const appt = appointments.find((a) => a.id === appointmentId)
+    if (!canIssueConfirmation(appt)) return null
+    const confirmation = {
+      id: newId('pc'),
+      number: nextConfirmationNumber(confirmations),
+      appointmentId,
+      issuedAt: Date.now(),
+      clientName: appt.clientName,
+      serviceId: appt.serviceId,
+      appointmentDate: appt.date,
+      amountAgorot: appt.amountPaidAgorot,
+      paymentMethod: appt.paymentMethod,
+      businessType: receiptSettings.businessType,
+    }
+    setConfirmations((prev) => [...prev, confirmation])
+    return confirmation
+  }
+  const updateReceiptSettings = (patch) => setReceiptSettings((prev) => ({ ...prev, ...patch }))
+
   const addExpense = (expense) => setExpenses((prev) => [{ id: newId('exp'), note: '', ...expense }, ...prev])
   const updateExpense = (id, patch) =>
     setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch, noteKey: 'note' in patch ? null : e.noteKey } : e)))
@@ -517,6 +544,8 @@ export function DataProvider({ children }) {
     features,
     expenses,
     messagingSettings,
+    receiptSettings,
+    confirmations,
     messageLog,
 
     setDraftService,
@@ -526,6 +555,8 @@ export function DataProvider({ children }) {
     confirmDraftBooking,
     cancelAppointment,
     recordPayment,
+    issueConfirmation,
+    updateReceiptSettings,
     logBookingMessage,
     logMessage,
     renderMessage,

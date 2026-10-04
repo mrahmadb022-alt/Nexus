@@ -9,7 +9,7 @@ Resume from here after /clear. Spec: ROADMAP.md. Decisions: DECISIONS.md.
 | 2 | Payments + finance dashboard + CSV/XLSX | done |
 | 3 | Automated messages (simulated) + log | done |
 | 4 | Calendar: .ics + Google link + export all | done |
-| 5 | Receipts (demo) | todo |
+| 5 | Receipts (demo) | done |
 | 6 | Marketing consent + campaign composer | todo |
 | 7 | Staff availability per staff member | todo |
 | — | Playwright smoke test (375px, Hebrew), push branch | todo |

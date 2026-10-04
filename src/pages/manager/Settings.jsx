@@ -6,6 +6,7 @@ import { minutesToDuration } from '../../utils/date'
 import { THEME_PRESETS } from '../../themes'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import FeatureSettings from '../../components/manager/FeatureSettings'
+import ReceiptSettings from '../../components/manager/ReceiptSettings'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import { formatShekels, parseShekelsToAgorot, agorotToInput } from '../../lib/money'
 import { normalizePhone } from '../../lib/phone'
@@ -358,6 +359,8 @@ export default function BusinessSettings() {
                 ))}
               </div>
             </div>
+
+            <ReceiptSettings />
 
             <div className="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant/30">
               {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}

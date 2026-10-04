@@ -1,15 +1,20 @@
 import { useState } from 'react'
-import { Wallet } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Wallet, FileText } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
 import { PAYMENT_METHODS, PAYMENT_STATUSES } from '../../lib/finance'
 import { agorotToInput, formatShekels, parseShekelsToAgorot } from '../../lib/money'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { canIssueConfirmation, formatConfirmationNumber } from '../../lib/receipts'
 
 // Payment status / method / amount for one booking, inside the appointment details modal.
 export default function PaymentEditor({ appointment }) {
   const { t } = useLanguage()
-  const { recordPayment } = useData()
+  const { recordPayment, isFeatureOn, confirmations, issueConfirmation } = useData()
+  const navigate = useNavigate()
+  const [issuing, guardIssue] = useSubmitGuard()
+  const existing = confirmations.find((c) => c.appointmentId === appointment.id)
   const [saving, guard] = useSubmitGuard()
   const [status, setStatus] = useState(appointment.paymentStatus || 'unpaid')
   const [method, setMethod] = useState(appointment.paymentMethod || 'cash')
@@ -24,6 +29,11 @@ export default function PaymentEditor({ appointment }) {
     recordPayment(appointment.id, { paymentStatus: status, paymentMethod: method, amountPaidAgorot: amountAgorot })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  })
+
+  const handleConfirmation = guardIssue(() => {
+    const c = existing || issueConfirmation(appointment.id)
+    if (c) navigate(`/manager/confirmation/${c.id}`)
   })
 
   return (
@@ -87,6 +97,20 @@ export default function PaymentEditor({ appointment }) {
             />
           </div>
         </div>
+      )}
+
+      {isFeatureOn('receipts') && canIssueConfirmation(appointment) && (
+        <button
+          type="button"
+          onClick={handleConfirmation}
+          disabled={issuing}
+          className="flex items-center gap-1.5 self-start font-sans text-body-sm text-primary hover:underline disabled:opacity-60"
+        >
+          <FileText size={14} />
+          {existing
+            ? t('receipt.view').replace('{number}', formatConfirmationNumber(existing.number))
+            : t('receipt.issue')}
+        </button>
       )}
 
       <div className="flex items-center justify-end gap-3">

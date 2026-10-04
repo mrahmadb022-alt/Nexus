@@ -53,3 +53,8 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - `src/lib/ics.js` is ported from booking-app: RFC 5545 escaping, 75-octet folding that never splits a Hebrew/Arabic character, and UTC times computed from the Jerusalem wall clock plus the booking's snapshot duration.
 - Per booking: an "Add to calendar" button (.ics download) next to a Google Calendar template link (no OAuth). They appear on the client's confirmation screen, the client's upcoming bookings, and the manager's appointment modal. Clients see "service · salon"; the manager's copy shows "client · service" with the phone.
 - "Export all bookings (.ics)" sits on the Schedule page. Cancelled bookings are included with `STATUS:CANCELLED`, so re-importing removes them. `SEQUENCE` follows `updatedAt`, so reschedules replace the old event.
+
+## 5. Receipts (demo)
+- A "payment confirmation" can be issued for any paid booking from its payment section. It is numbered `DEMO-0001`, `DEMO-0002`, and so on: sequential, never reused, one per booking (issuing again opens the existing one). It opens as a standalone printable page (`/manager/confirmation/:id`, no app navigation) with a "Not a tax document" notice inside the printed area.
+- The business type setting (exempt / licensed / company) is in Settings → "Receipts & invoicing", together with the official documents an invoicing provider would unlock: exempt → receipt; licensed or company → tax invoice, tax invoice/receipt, receipt, credit invoice. Licensed dealers and companies also see an allocation-number note. No specific shekel threshold is shown because it changes by year.
+- The demo business address and timezone are now Israeli (Tel Aviv, Asia/Jerusalem) instead of the US placeholder.
