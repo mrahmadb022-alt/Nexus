@@ -62,3 +62,40 @@ test('manager pages fit 375px in Arabic (RTL) without nested interactive element
     await assertMobileLayout(page)
   }
 })
+
+test('changes survive a reload and "Reset demo data" restores the seed', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('nexus_lang', 'en'))
+  await page.goto('/manager/settings')
+  const finance = page.getByRole('checkbox', { name: /^Payments & finance/ })
+  await expect(finance).toBeChecked()
+  await finance.uncheck({ force: true })
+  await expect(finance).not.toBeChecked()
+
+  await page.reload()
+  await expect(finance).not.toBeChecked()
+
+  // Cancelling the confirmation keeps the data.
+  await page.getByRole('button', { name: 'Reset demo data' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Cancel' }).click()
+  await expect(finance).not.toBeChecked()
+
+  await page.getByRole('button', { name: 'Reset demo data' }).click()
+  await expect(page.getByRole('alertdialog')).toContainText('cannot be undone')
+  await page.getByRole('button', { name: 'Yes, reset' }).click()
+  await expect(page.getByRole('status')).toHaveText('Demo data restored.')
+  await expect(finance).toBeChecked()
+  await assertMobileLayout(page)
+
+  await page.reload()
+  await expect(finance).toBeChecked()
+})
+
+test('corrupt saved data falls back to the demo seed', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('nexus_lang', 'en')
+    localStorage.setItem('nexus-booking:data', '{not json')
+  })
+  await page.goto('/manager/settings')
+  await expect(page.getByRole('checkbox', { name: /^Payments & finance/ })).toBeChecked()
+  await expect(page.locator('input[value="Nexus Salon - Main St"]')).toBeVisible()
+})

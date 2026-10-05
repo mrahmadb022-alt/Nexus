@@ -6,6 +6,7 @@ import { useLanguage } from './LanguageContext'
 import { bookingMessageVars, renderBookingMessage } from '../lib/messages'
 import { canIssueConfirmation, nextConfirmationNumber } from '../lib/receipts'
 import { freeStaffForSlot, hasConflict } from '../lib/availability'
+import { clearState, loadState, saveState } from '../lib/persistence'
 
 const DataContext = createContext(null)
 
@@ -90,7 +91,7 @@ const INITIAL_GALLERY = [
   { id: 'g6', url: 'https://picsum.photos/seed/nexus-gallery-6/500/500' },
 ]
 
-const INITIAL_REVIEWS = [
+const initialReviews = () => [
   { id: 'r1', name: 'Sarah Jenkins', initials: 'SJ', rating: 5, textKey: 'review.1', date: iso(-2) },
   { id: 'r2', name: 'Michael R.', initials: 'MR', rating: 4, textKey: 'review.2', date: iso(-7) },
   { id: 'r3', name: 'Emma Thompson', initials: 'ET', rating: 5, textKey: 'review.3', date: iso(-14) },
@@ -99,7 +100,7 @@ const INITIAL_REVIEWS = [
   { id: 'r6', name: 'Lucas Meyer', initials: 'LM', rating: 4, textKey: 'review.6', date: iso(-30) },
 ]
 
-const INITIAL_ANNOUNCEMENTS = [
+const initialAnnouncements = () => [
   {
     id: 'a1',
     titleKey: 'ann.holiday.title',
@@ -126,13 +127,13 @@ const INITIAL_ANNOUNCEMENTS = [
   },
 ]
 
-const INITIAL_OFFERS = [
+const initialOffers = () => [
   { id: 'o1', titleKey: 'offer.welcome.title', descriptionKey: 'offer.welcome.desc', discountLabel: '15%', active: true, expiresLabel: iso(60) },
   { id: 'o2', titleKey: 'offer.fall.title', descriptionKey: 'offer.fall.desc', discountLabel: '₪20', active: false, expiresLabel: iso(-5) },
   { id: 'o3', titleKey: 'offer.referral.title', descriptionKey: 'offer.referral.desc', discountLabel: '10%', active: true, expiresLabel: iso(90) },
 ]
 
-const INITIAL_APPOINTMENTS = [
+const initialAppointments = () => [
   {
     id: 'apt-1',
     clientId: MOCK_CLIENT_ID,
@@ -200,8 +201,6 @@ const INITIAL_APPOINTMENTS = [
   },
 ]
 
-const SEED_HISTORY = buildSeedHistory({ services: INITIAL_SERVICES, staff: STAFF })
-
 // Every booking snapshots its price and duration at creation (so later catalog edits don't
 // rewrite history) and carries payment fields. Money is integer agorot.
 function withBookingDefaults(appt, services) {
@@ -218,20 +217,16 @@ function withBookingDefaults(appt, services) {
   }
 }
 
-const SEEDED_APPOINTMENTS = [...SEED_HISTORY.bookings, ...INITIAL_APPOINTMENTS].map((a) =>
-  withBookingDefaults(a, INITIAL_SERVICES),
-)
-
 const DEFAULT_MESSAGING_SETTINGS = { confirmation: true, reminder: true, cancellation: true, reminderHours: 24 }
 
 // A couple of entries so the (simulated) message log isn't empty on first open. `body: null`
 // means "render in the current language when shown"; live entries store the text they'd send.
-const INITIAL_MESSAGE_LOG = [
+const initialMessageLog = () => [
   { id: 'msg-seed-1', kind: 'confirmation', appointmentId: 'apt-5', createdAt: Date.now() - 26 * 3600000, body: null },
   { id: 'msg-seed-2', kind: 'confirmation', appointmentId: 'apt-3', createdAt: Date.now() - 3 * 3600000, body: null },
 ]
 
-const INITIAL_WAITLIST = [
+const initialWaitlist = () => [
   {
     id: 'w1',
     clientId: 'c-amanda',
@@ -280,6 +275,34 @@ const DEFAULT_CLIENT_PROFILE = {
   email: '',
 }
 
+// The full demo dataset, built fresh each call so seed dates are relative to *now* — used on a
+// first visit, when the saved data is missing or corrupt, and by "Reset demo data".
+// eslint-disable-next-line react-refresh/only-export-components
+export function buildSeedState() {
+  const history = buildSeedHistory({ services: INITIAL_SERVICES, staff: STAFF })
+  return {
+    appointments: [...history.bookings, ...initialAppointments()].map((a) => withBookingDefaults(a, INITIAL_SERVICES)),
+    gallery: INITIAL_GALLERY,
+    staffList: STAFF,
+    services: INITIAL_SERVICES,
+    reviews: initialReviews(),
+    announcements: initialAnnouncements(),
+    offers: initialOffers(),
+    waitlist: initialWaitlist(),
+    perDayHours: DEFAULT_PER_DAY_HOURS,
+    businessSettings: DEFAULT_BUSINESS_SETTINGS,
+    clientProfile: DEFAULT_CLIENT_PROFILE,
+    features: DEFAULT_FEATURES,
+    expenses: history.expenses,
+    messagingSettings: DEFAULT_MESSAGING_SETTINGS,
+    messageLog: initialMessageLog(),
+    receiptSettings: { businessType: 'exempt' },
+    confirmations: [],
+    // clientId → marketing consent. Only an explicit choice changes it (see lib/marketing.js).
+    marketingConsents: Object.fromEntries(history.clients.map((c) => [c.clientId, c.marketingConsent])),
+  }
+}
+
 function initialsFromName(name) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return 'YO'
@@ -290,31 +313,87 @@ function initialsFromName(name) {
 }
 
 export function DataProvider({ children }) {
-  const [appointments, setAppointments] = useState(SEEDED_APPOINTMENTS)
-  const [gallery, setGallery] = useState(INITIAL_GALLERY)
-  const [staffList, setStaffList] = useState(STAFF)
-  const [services, setServices] = useState(INITIAL_SERVICES)
-  const [reviews, setReviews] = useState(INITIAL_REVIEWS)
-  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS)
-  const [offers, setOffers] = useState(INITIAL_OFFERS)
-  const [waitlist, setWaitlist] = useState(INITIAL_WAITLIST)
-  const [perDayHours, setPerDayHours] = useState(DEFAULT_PER_DAY_HOURS)
-  const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
-  const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
+  // Loaded once: the saved data from localStorage, or a fresh demo seed if there is none or it's
+  // unusable (see lib/persistence.js).
+  const [initial] = useState(() => loadState(buildSeedState()).state)
+  const [appointments, setAppointments] = useState(initial.appointments)
+  const [gallery, setGallery] = useState(initial.gallery)
+  const [staffList, setStaffList] = useState(initial.staffList)
+  const [services, setServices] = useState(initial.services)
+  const [reviews, setReviews] = useState(initial.reviews)
+  const [announcements, setAnnouncements] = useState(initial.announcements)
+  const [offers, setOffers] = useState(initial.offers)
+  const [waitlist, setWaitlist] = useState(initial.waitlist)
+  const [perDayHours, setPerDayHours] = useState(initial.perDayHours)
+  const [businessSettings, setBusinessSettings] = useState(initial.businessSettings)
+  const [clientProfile, setClientProfile] = useState(initial.clientProfile)
   // Kept out of businessSettings on purpose: the Settings page edits a local copy of
   // businessSettings and writes the whole object back on Save, which would revert toggles.
-  const [features, setFeatures] = useState(DEFAULT_FEATURES)
-  const [expenses, setExpenses] = useState(SEED_HISTORY.expenses)
-  const [messagingSettings, setMessagingSettings] = useState(DEFAULT_MESSAGING_SETTINGS)
-  const [messageLog, setMessageLog] = useState(INITIAL_MESSAGE_LOG)
+  const [features, setFeatures] = useState(initial.features)
+  const [expenses, setExpenses] = useState(initial.expenses)
+  const [messagingSettings, setMessagingSettings] = useState(initial.messagingSettings)
+  const [messageLog, setMessageLog] = useState(initial.messageLog)
   const { t, lang } = useLanguage()
-  const [receiptSettings, setReceiptSettings] = useState({ businessType: 'exempt' })
-  const [confirmations, setConfirmations] = useState([])
+  const [receiptSettings, setReceiptSettings] = useState(initial.receiptSettings)
+  const [confirmations, setConfirmations] = useState(initial.confirmations)
   // clientId → marketing consent. Only an explicit choice changes it (see lib/marketing.js).
-  const [marketingConsents, setMarketingConsents] = useState(() =>
-    Object.fromEntries(SEED_HISTORY.clients.map((c) => [c.clientId, c.marketingConsent])),
-  )
+  const [marketingConsents, setMarketingConsents] = useState(initial.marketingConsents)
   const setMarketingConsent = (clientId, consent) => setMarketingConsents((prev) => ({ ...prev, [clientId]: consent }))
+
+  const persisted = {
+    appointments,
+    gallery,
+    staffList,
+    services,
+    reviews,
+    announcements,
+    offers,
+    waitlist,
+    perDayHours,
+    businessSettings,
+    clientProfile,
+    features,
+    expenses,
+    messagingSettings,
+    messageLog,
+    receiptSettings,
+    confirmations,
+    marketingConsents,
+  }
+
+  // Save after any change to a persisted slice. A failed write (quota, blocked storage) is
+  // ignored: the session keeps working from memory.
+  useEffect(() => {
+    saveState(persisted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, Object.values(persisted))
+
+  // Wipes the saved data and puts every slice back to a fresh demo seed. Returns the new state
+  // so pages holding local copies (Settings' form) can resync.
+  const resetDemoData = () => {
+    clearState()
+    const seed = buildSeedState()
+    setAppointments(seed.appointments)
+    setGallery(seed.gallery)
+    setStaffList(seed.staffList)
+    setServices(seed.services)
+    setReviews(seed.reviews)
+    setAnnouncements(seed.announcements)
+    setOffers(seed.offers)
+    setWaitlist(seed.waitlist)
+    setPerDayHours(seed.perDayHours)
+    setBusinessSettings(seed.businessSettings)
+    setClientProfile(seed.clientProfile)
+    setFeatures(seed.features)
+    setExpenses(seed.expenses)
+    setMessagingSettings(seed.messagingSettings)
+    setMessageLog(seed.messageLog)
+    setReceiptSettings(seed.receiptSettings)
+    setConfirmations(seed.confirmations)
+    setMarketingConsents(seed.marketingConsents)
+    resetDraft()
+    return seed
+  }
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -626,6 +705,7 @@ export function DataProvider({ children }) {
     getStaffById,
     setFeature,
     isFeatureOn,
+    resetDemoData,
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

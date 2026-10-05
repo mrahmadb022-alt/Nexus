@@ -8,7 +8,7 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 - **Branch:** all work is on `feature/nail-artist-roadmap`. `main` is never committed to or pushed.
 
 ## Data & persistence
-- Nexus keeps all data in React state inside `DataContext` with no storage, so a reload resets to seed data. New data (payments, expenses, message log, receipts, settings) follows the same pattern. Only the UI language uses localStorage, as before.
+- Data lives in React state inside `DataContext` and is saved to localStorage (see "Browser persistence" below).
 - Pure logic lives in `src/lib/*` (no React). Pages and tests both import it, so the numbers always agree.
 
 ## Money
@@ -74,3 +74,11 @@ Choices made while building the nail-artist roadmap (see ROADMAP.md), recorded i
 ## Testing
 - Vitest: `src/**/*.test.js` covers phone, money, time, finance, CSV/BOM, XLSX, datasets, ICS, messages, receipts, marketing, availability, and translation key parity across en/he/ar.
 - Playwright (`tests/e2e`, pinned to 1.63.0) runs at 375px with the Jerusalem timezone. It books through the full flow in Hebrew, and sweeps manager pages in Arabic for horizontal overflow and nested interactive elements. It starts its own Vite server on port 5174.
+
+## Browser persistence
+- `src/lib/persistence.js` saves every DataContext slice (bookings, gallery, staff, services, reviews, announcements, offers, waitlist, hours, business settings, client profile, feature switches, expenses, messaging settings, message log, receipt settings, confirmations, marketing consents) under one key, `nexus-booking:data`, as `{ version, savedAt, data }`. The booking draft is not saved.
+- It saves after every change and loads once on startup. Each read and write is in try/catch. If storage is blocked or full, the app keeps working from memory.
+- Corrupt JSON, a different `version` or a non-object payload means the whole save is ignored and the demo seed is used. A single slice with the wrong shape (array vs object) falls back to its seed slice. Saved objects are merged over the seed, so settings or feature switches added later get their defaults.
+- Uploaded images are `blob:` URLs, which stop working once the page is closed. They are dropped on load: gallery entries are removed, and the hero and logo go back to their seed values.
+- The seed is built by `buildSeedState()`, which runs fresh each time, so dates stay relative to today after a reset. Saved data keeps its original dates.
+- "Reset demo data" is at the bottom of Settings. It uses an inline, translated confirmation instead of `window.confirm`. It clears the key and puts every slice back to a fresh seed.

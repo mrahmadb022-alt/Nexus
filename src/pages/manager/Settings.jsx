@@ -7,6 +7,7 @@ import { THEME_PRESETS } from '../../themes'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
 import FeatureSettings from '../../components/manager/FeatureSettings'
 import ReceiptSettings from '../../components/manager/ReceiptSettings'
+import ResetDemoData from '../../components/manager/ResetDemoData'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
 import { formatShekels, parseShekelsToAgorot, agorotToInput } from '../../lib/money'
 import { normalizePhone } from '../../lib/phone'
@@ -371,6 +372,13 @@ export default function BusinessSettings() {
                 {t('Save Changes')}
               </button>
             </div>
+
+            <ResetDemoData
+              onReset={(seed) => {
+                setForm({ ...seed.businessSettings })
+                closeServiceForm()
+              }}
+            />
           </div>
         </div>
       </main>
