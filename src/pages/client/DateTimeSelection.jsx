@@ -3,47 +3,39 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData, MOCK_CLIENT_ID } from '../../context/DataContext'
-import { formatDateLong, formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
+import { formatDateLong, formatMonthYear, formatTime, toISODate } from '../../utils/date'
+import { useAvailability } from '../../hooks/useAvailability'
+import { hoursForDate } from '../../lib/availability'
 import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function DateTimeSelection() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, setDraftDateTime, perDayHours, appointments, waitlist, joinWaitlist, businessSettings } = useData()
+  const { draft, setDraftDateTime, perDayHours, waitlist, joinWaitlist, businessSettings, getStaffById } = useData()
+  const availableSlots = useAvailability()
+  const chosenStaff = draft.staffId ? getStaffById(draft.staffId) : null
   const [joiningWaitlist, guardJoinWaitlist] = useSubmitGuard()
 
   useEffect(() => {
     if (!draft.serviceId) navigate('/services', { replace: true })
   }, [draft.serviceId])
 
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
+  // Local-midnight Date of *Jerusalem's* today, so the calendar grid's past/today split
+  // follows the business clock even on a device set to another timezone.
+  const today = useMemo(() => new Date(todayInTz() + 'T00:00:00'), [])
 
   const [viewMonth, setViewMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState(draft.date || toISODate(today))
   const [selectedTime, setSelectedTime] = useState(draft.time || null)
 
-  const bookedTimesForDate = (isoDate) =>
-    appointments.filter((a) => a.date === isoDate && a.status !== 'cancelled').map((a) => a.time)
-
-  const slotsForDate = (isoDate) => {
-    const weekday = new Date(isoDate + 'T00:00:00').getDay()
-    const hours = perDayHours[weekday]
-    if (!hours || !hours.working || hours.locked) return []
-    return generateSlots(hours.start, hours.end)
-  }
-
-  const availableSlotsToday = useMemo(() => {
-    const all = slotsForDate(selectedDate)
-    const booked = bookedTimesForDate(selectedDate)
-    return all.filter((s) => !booked.includes(s))
-  }, [selectedDate, perDayHours, appointments])
+  // Per-staff, duration-aware availability: the chosen professional's own calendar, or the
+  // union over everyone for "any available" (see lib/availability.js).
+  const slotsFor = (isoDate) => availableSlots({ date: isoDate, serviceId: draft.serviceId, staffId: draft.staffId ?? null })
+  const availableSlotsToday = slotsFor(selectedDate)
 
   const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate()
   const firstWeekday = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay()
@@ -57,11 +49,8 @@ export default function DateTimeSelection() {
     cellDate.setHours(0, 0, 0, 0)
     const iso = toISODate(cellDate)
     if (cellDate < today) return 'past'
-    const slots = slotsForDate(iso)
-    if (slots.length === 0) return 'closed'
-    const booked = bookedTimesForDate(iso)
-    const remaining = slots.filter((s) => !booked.includes(s))
-    if (remaining.length === 0) return 'full'
+    if (!hoursForDate(perDayHours, iso)) return 'closed'
+    if (slotsFor(iso).length === 0) return 'full'
     return 'available'
   }
 
@@ -115,7 +104,12 @@ export default function DateTimeSelection() {
           <h2 className="font-sans md:font-sans text-display-lg-mobile md:text-display-lg text-primary mb-2">
             {t('Select Date & Time')}
           </h2>
-          <p className="font-sans text-body-lg text-on-surface-variant mb-8">{t("Choose when you'd like your appointment.")}</p>
+          <p className="font-sans text-body-lg text-on-surface-variant mb-8">
+            {t("Choose when you'd like your appointment.")}{' '}
+            <span className="block text-body-sm mt-1">
+              {chosenStaff ? t('staff.availabilityFor').replace('{name}', chosenStaff.name) : t('staff.availabilityAny')}
+            </span>
+          </p>
 
           <div className="bg-surface shadow-card-client rounded-2xl p-6 mb-8 border border-surface-variant">
             <div className="flex items-center justify-between mb-6">

@@ -1,7 +1,9 @@
 // Flat translation dictionary. Key = canonical English string used as lookup key.
 // Usage: const { t } = useLanguage(); t('Book Now')
 
-export const translations = {
+import { featureTranslations } from './translations.features'
+
+const base = {
   en: {
     // Brand / global nav
     'Nexus Booking': 'Nexus Booking',
@@ -879,3 +881,8 @@ export const translations = {
     status_cancelled: 'ملغى',
   },
 }
+
+// Roadmap features keep their strings in their own file; merged per language here.
+export const translations = Object.fromEntries(
+  Object.entries(base).map(([lang, dict]) => [lang, { ...dict, ...(featureTranslations[lang] || {}) }]),
+)

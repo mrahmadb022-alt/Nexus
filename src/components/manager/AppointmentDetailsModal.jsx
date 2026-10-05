@@ -5,10 +5,19 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useData, serviceName } from '../../context/DataContext'
 import { formatDateLong, formatTime, minutesToDuration } from '../../utils/date'
 import StatusPill from '../StatusPill'
+import { formatShekels } from '../../lib/money'
+import { formatPhoneDisplay } from '../../lib/phone'
+import ContactActions from '../ContactActions'
+import PaymentEditor from './PaymentEditor'
+import CalendarActions from '../CalendarActions'
+import { useBookingMessage } from '../../hooks/useBookingMessage'
 
-export default function AppointmentDetailsModal({ appointment, onClose }) {
+export default function AppointmentDetailsModal({ appointment: initial, onClose }) {
   const { t, lang } = useLanguage()
-  const { services, getStaffById, updateAppointmentStatus } = useData()
+  const { services, getStaffById, updateAppointmentStatus, appointments, isFeatureOn } = useData()
+  // Parents pass a snapshot; read the live record so edits made here (payment, status) show up.
+  const appointment = appointments.find((a) => a.id === initial.id) || initial
+  const bookingMessage = useBookingMessage()
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -56,9 +65,13 @@ export default function AppointmentDetailsModal({ appointment, onClose }) {
             {appointment.clientPhone && (
               <div className="flex items-center gap-3 text-on-surface-variant">
                 <Phone size={18} className="shrink-0" />
-                <span className="text-body-sm text-on-surface">{appointment.clientPhone}</span>
+                <span className="text-body-sm text-on-surface" dir="ltr">{formatPhoneDisplay(appointment.clientPhone)}</span>
               </div>
             )}
+            <ContactActions
+              phone={appointment.clientPhone}
+              message={bookingMessage(appointment.status === 'cancelled' ? 'cancellation' : 'confirmation', appointment)}
+            />
             {appointment.clientEmail && (
               <div className="flex items-center gap-3 text-on-surface-variant">
                 <Mail size={18} className="shrink-0" />
@@ -69,7 +82,7 @@ export default function AppointmentDetailsModal({ appointment, onClose }) {
               <Scissors size={18} className="shrink-0" />
               <span className="text-body-sm text-on-surface">
                 {serviceName(svc, t)}
-                {svc ? ` • ${minutesToDuration(svc.duration, t)} • ₪${svc.price}` : ''}
+                {svc ? ` • ${minutesToDuration(svc.duration, t)} • ${formatShekels(appointment.priceAgorot ?? svc.priceAgorot)}` : ''}
               </span>
             </div>
             <div className="flex items-center gap-3 text-on-surface-variant">
@@ -87,6 +100,8 @@ export default function AppointmentDetailsModal({ appointment, onClose }) {
               </div>
             )}
           </div>
+          <CalendarActions appointment={appointment} audience="owner" />
+          {isFeatureOn('finance') && <PaymentEditor key={appointment.id} appointment={appointment} />}
         </div>
 
         {appointment.status !== 'in-service' && appointment.status !== 'completed' && appointment.status !== 'cancelled' && (

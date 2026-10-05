@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../../context/LanguageContext'
 import { useData, serviceName, MOCK_CLIENT_ID } from '../../../context/DataContext'
 import { formatDateLong, formatTime, isBusinessOpenNow } from '../../../utils/date'
+import { todayIso as todayInTz } from '../../../lib/time'
 
 export default function WelcomeSection() {
   const { t, lang, isRtl } = useLanguage()
@@ -10,7 +11,7 @@ export default function WelcomeSection() {
   const { businessSettings, perDayHours, appointments, clientProfile, services } = useData()
 
   const isOpen = isBusinessOpenNow(perDayHours)
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = todayInTz()
   const nextAppointment = appointments
     .filter((a) => a.clientId === MOCK_CLIENT_ID && a.status !== 'cancelled' && a.status !== 'completed' && a.date >= todayIso)
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0]

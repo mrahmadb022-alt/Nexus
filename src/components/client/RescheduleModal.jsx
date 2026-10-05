@@ -3,14 +3,17 @@ import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
-import { formatMonthYear, formatTime, generateSlots, toISODate } from '../../utils/date'
+import { formatMonthYear, formatTime, toISODate } from '../../utils/date'
+import { useAvailability } from '../../hooks/useAvailability'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { todayIso as todayInTz } from '../../lib/time'
 
 const WEEKDAY_LETTERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function RescheduleModal({ appointment, onClose, onConfirm }) {
   const { t, lang, isRtl } = useLanguage()
-  const { perDayHours, appointments } = useData()
+  const { perDayHours } = useData()
+  const availableSlotsFor = useAvailability()
   const [confirming, guardConfirm] = useSubmitGuard()
 
   useEffect(() => {
@@ -26,11 +29,9 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
+  // Local-midnight Date of *Jerusalem's* today, so the calendar grid's past/today split
+  // follows the business clock even on a device set to another timezone.
+  const today = useMemo(() => new Date(todayInTz() + 'T00:00:00'), [])
 
   const initialDate = new Date(appointment.date + 'T00:00:00')
   const [viewMonth, setViewMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1))
@@ -39,23 +40,14 @@ export default function RescheduleModal({ appointment, onClose, onConfirm }) {
 
   const handleConfirm = guardConfirm(() => onConfirm(selectedDate, selectedTime))
 
-  const bookedTimesForDate = (isoDate) =>
-    appointments
-      .filter((a) => a.date === isoDate && a.status !== 'cancelled' && a.id !== appointment.id)
-      .map((a) => a.time)
-
-  const slotsForDate = (isoDate) => {
-    const weekday = new Date(isoDate + 'T00:00:00').getDay()
-    const hours = perDayHours[weekday]
-    if (!hours || !hours.working || hours.locked) return []
-    return generateSlots(hours.start, hours.end)
-  }
-
-  const availableSlots = useMemo(() => {
-    const all = slotsForDate(selectedDate)
-    const booked = bookedTimesForDate(selectedDate)
-    return all.filter((s) => !booked.includes(s))
-  }, [selectedDate, perDayHours, appointments])
+  // Same staff member, same duration; the appointment's own current slot doesn't block itself.
+  const availableSlots = availableSlotsFor({
+    date: selectedDate,
+    serviceId: appointment.serviceId,
+    durationMinutes: appointment.durationMinutes,
+    staffId: appointment.staffId ?? null,
+    excludeBookingId: appointment.id,
+  })
 
   const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate()
   const firstWeekday = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay()

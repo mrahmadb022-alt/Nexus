@@ -1,12 +1,19 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { addDays, toISODate } from '../utils/date'
+import { todayIso, addDaysIso } from '../lib/time'
+import { DEFAULT_FEATURES } from '../lib/features'
+import { buildSeedHistory } from './seedHistory'
+import { useLanguage } from './LanguageContext'
+import { bookingMessageVars, renderBookingMessage } from '../lib/messages'
+import { canIssueConfirmation, nextConfirmationNumber } from '../lib/receipts'
+import { freeStaffForSlot, hasConflict } from '../lib/availability'
+import { clearState, loadState, saveState } from '../lib/persistence'
 
 const DataContext = createContext(null)
 
 export const MOCK_CLIENT_ID = 'you'
 
-const today = new Date()
-const iso = (offset) => toISODate(addDays(today, offset))
+// Seed dates are relative to today in Asia/Jerusalem (the business clock), not the device's zone.
+const iso = (offset) => addDaysIso(todayIso(), offset)
 
 // Collision-resistant client-generated IDs (not timestamp-based) — two records created in the
 // same millisecond, e.g. from a rapid double-tap slipping past the submit guard, must never
@@ -22,7 +29,7 @@ const INITIAL_SERVICES = [
     id: 'svc-haircut',
     nameKey: 'svc.haircut.name',
     descKey: 'svc.haircut.desc',
-    price: 65,
+    priceAgorot: 6500,
     duration: 45,
     image: 'https://picsum.photos/seed/nexus-haircut/400/400',
   },
@@ -30,7 +37,7 @@ const INITIAL_SERVICES = [
     id: 'svc-balayage',
     nameKey: 'svc.balayage.name',
     descKey: 'svc.balayage.desc',
-    price: 185,
+    priceAgorot: 18500,
     duration: 150,
     image: 'https://picsum.photos/seed/nexus-balayage/400/400',
   },
@@ -38,7 +45,7 @@ const INITIAL_SERVICES = [
     id: 'svc-treatment',
     nameKey: 'svc.treatment.name',
     descKey: 'svc.treatment.desc',
-    price: 45,
+    priceAgorot: 4500,
     duration: 30,
     image: 'https://picsum.photos/seed/nexus-treatment/400/400',
   },
@@ -46,7 +53,7 @@ const INITIAL_SERVICES = [
     id: 'svc-bridal',
     nameKey: 'svc.bridal.name',
     descKey: 'svc.bridal.desc',
-    price: 220,
+    priceAgorot: 22000,
     duration: 90,
     image: 'https://picsum.photos/seed/nexus-bridal/400/400',
   },
@@ -54,7 +61,7 @@ const INITIAL_SERVICES = [
     id: 'svc-beard',
     nameKey: 'svc.beard.name',
     descKey: 'svc.beard.desc',
-    price: 35,
+    priceAgorot: 3500,
     duration: 20,
     image: 'https://picsum.photos/seed/nexus-beard/400/400',
   },
@@ -62,7 +69,7 @@ const INITIAL_SERVICES = [
     id: 'svc-manicure',
     nameKey: 'svc.manicure.name',
     descKey: 'svc.manicure.desc',
-    price: 55,
+    priceAgorot: 5500,
     duration: 40,
     image: 'https://picsum.photos/seed/nexus-manicure/400/400',
   },
@@ -84,7 +91,7 @@ const INITIAL_GALLERY = [
   { id: 'g6', url: 'https://picsum.photos/seed/nexus-gallery-6/500/500' },
 ]
 
-const INITIAL_REVIEWS = [
+const initialReviews = () => [
   { id: 'r1', name: 'Sarah Jenkins', initials: 'SJ', rating: 5, textKey: 'review.1', date: iso(-2) },
   { id: 'r2', name: 'Michael R.', initials: 'MR', rating: 4, textKey: 'review.2', date: iso(-7) },
   { id: 'r3', name: 'Emma Thompson', initials: 'ET', rating: 5, textKey: 'review.3', date: iso(-14) },
@@ -93,7 +100,7 @@ const INITIAL_REVIEWS = [
   { id: 'r6', name: 'Lucas Meyer', initials: 'LM', rating: 4, textKey: 'review.6', date: iso(-30) },
 ]
 
-const INITIAL_ANNOUNCEMENTS = [
+const initialAnnouncements = () => [
   {
     id: 'a1',
     titleKey: 'ann.holiday.title',
@@ -120,19 +127,19 @@ const INITIAL_ANNOUNCEMENTS = [
   },
 ]
 
-const INITIAL_OFFERS = [
+const initialOffers = () => [
   { id: 'o1', titleKey: 'offer.welcome.title', descriptionKey: 'offer.welcome.desc', discountLabel: '15%', active: true, expiresLabel: iso(60) },
   { id: 'o2', titleKey: 'offer.fall.title', descriptionKey: 'offer.fall.desc', discountLabel: '₪20', active: false, expiresLabel: iso(-5) },
   { id: 'o3', titleKey: 'offer.referral.title', descriptionKey: 'offer.referral.desc', discountLabel: '10%', active: true, expiresLabel: iso(90) },
 ]
 
-const INITIAL_APPOINTMENTS = [
+const initialAppointments = () => [
   {
     id: 'apt-1',
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
-    clientPhone: '+1 (555) 010-1142',
+    clientPhone: '054-123-4567',
     clientEmail: 'you@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-sarah',
@@ -145,7 +152,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: MOCK_CLIENT_ID,
     clientName: 'You',
     initials: 'YO',
-    clientPhone: '+1 (555) 201-4488',
+    clientPhone: '054-123-4567',
     clientEmail: 'you@example.com',
     serviceId: 'svc-treatment',
     staffId: 'staff-elena',
@@ -158,7 +165,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-marcus',
     clientName: 'Marcus Johnson',
     initials: 'MJ',
-    clientPhone: '+1 (555) 233-7710',
+    clientPhone: '0527654321',
     clientEmail: 'marcus.johnson@example.com',
     serviceId: 'svc-haircut',
     staffId: 'staff-marcus',
@@ -171,7 +178,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-emma',
     clientName: 'Emma Lawson',
     initials: 'EL',
-    clientPhone: '+1 (555) 448-2291',
+    clientPhone: '+972 50-555-1234',
     clientEmail: 'emma.lawson@example.com',
     serviceId: 'svc-balayage',
     staffId: 'staff-david',
@@ -184,7 +191,7 @@ const INITIAL_APPOINTMENTS = [
     clientId: 'c-tom',
     clientName: 'Tom Richards',
     initials: 'TR',
-    clientPhone: '+1 (555) 672-0143',
+    clientPhone: '+972541112233',
     clientEmail: 'tom.richards@example.com',
     serviceId: 'svc-beard',
     staffId: 'staff-marcus',
@@ -194,12 +201,37 @@ const INITIAL_APPOINTMENTS = [
   },
 ]
 
-const INITIAL_WAITLIST = [
+// Every booking snapshots its price and duration at creation (so later catalog edits don't
+// rewrite history) and carries payment fields. Money is integer agorot.
+function withBookingDefaults(appt, services) {
+  const svc = services.find((s) => s.id === appt.serviceId)
+  return {
+    paymentStatus: appt.status === 'cancelled' ? 'cancelled' : 'unpaid',
+    paymentMethod: null,
+    amountPaidAgorot: null,
+    marketingConsent: false,
+    createdAt: Date.now() - 7 * 86400000,
+    ...appt,
+    priceAgorot: appt.priceAgorot ?? svc?.priceAgorot ?? 0,
+    durationMinutes: appt.durationMinutes ?? svc?.duration ?? 30,
+  }
+}
+
+const DEFAULT_MESSAGING_SETTINGS = { confirmation: true, reminder: true, cancellation: true, reminderHours: 24 }
+
+// A couple of entries so the (simulated) message log isn't empty on first open. `body: null`
+// means "render in the current language when shown"; live entries store the text they'd send.
+const initialMessageLog = () => [
+  { id: 'msg-seed-1', kind: 'confirmation', appointmentId: 'apt-5', createdAt: Date.now() - 26 * 3600000, body: null },
+  { id: 'msg-seed-2', kind: 'confirmation', appointmentId: 'apt-3', createdAt: Date.now() - 3 * 3600000, body: null },
+]
+
+const initialWaitlist = () => [
   {
     id: 'w1',
     clientId: 'c-amanda',
     clientName: 'Amanda Lee',
-    clientPhone: '+1 (555) 391-6620',
+    clientPhone: '053 444 5566',
     date: iso(2),
     note: 'Any cut before 4PM',
     createdAt: Date.now() - 10 * 60000,
@@ -208,7 +240,7 @@ const INITIAL_WAITLIST = [
     id: 'w2',
     clientId: 'c-david2',
     clientName: 'David Chen',
-    clientPhone: '+1 (555) 807-2254',
+    clientPhone: '058-777-8899',
     date: iso(1),
     note: 'Color touch-up (urgent)',
     createdAt: Date.now() - 60 * 60000,
@@ -228,9 +260,9 @@ const DEFAULT_PER_DAY_HOURS = {
 const DEFAULT_BUSINESS_SETTINGS = {
   name: 'Nexus Salon - Main St',
   email: 'hello@nexusbooking.com',
-  phone: '+1 (555) 123-4567',
-  address: '123 Main Street, Suite 200\nMetropolis, NY 10001',
-  timezone: 'est',
+  phone: '03-555-1234',
+  address: 'Herzl St 12, Floor 2\nTel Aviv-Yafo',
+  timezone: 'Asia/Jerusalem',
   heroBackground: 'https://picsum.photos/seed/nexus-hero-bg/1600/900',
   logoUrl: null,
   about: null,
@@ -243,6 +275,34 @@ const DEFAULT_CLIENT_PROFILE = {
   email: '',
 }
 
+// The full demo dataset, built fresh each call so seed dates are relative to *now* — used on a
+// first visit, when the saved data is missing or corrupt, and by "Reset demo data".
+// eslint-disable-next-line react-refresh/only-export-components
+export function buildSeedState() {
+  const history = buildSeedHistory({ services: INITIAL_SERVICES, staff: STAFF })
+  return {
+    appointments: [...history.bookings, ...initialAppointments()].map((a) => withBookingDefaults(a, INITIAL_SERVICES)),
+    gallery: INITIAL_GALLERY,
+    staffList: STAFF,
+    services: INITIAL_SERVICES,
+    reviews: initialReviews(),
+    announcements: initialAnnouncements(),
+    offers: initialOffers(),
+    waitlist: initialWaitlist(),
+    perDayHours: DEFAULT_PER_DAY_HOURS,
+    businessSettings: DEFAULT_BUSINESS_SETTINGS,
+    clientProfile: DEFAULT_CLIENT_PROFILE,
+    features: DEFAULT_FEATURES,
+    expenses: history.expenses,
+    messagingSettings: DEFAULT_MESSAGING_SETTINGS,
+    messageLog: initialMessageLog(),
+    receiptSettings: { businessType: 'exempt' },
+    confirmations: [],
+    // clientId → marketing consent. Only an explicit choice changes it (see lib/marketing.js).
+    marketingConsents: Object.fromEntries(history.clients.map((c) => [c.clientId, c.marketingConsent])),
+  }
+}
+
 function initialsFromName(name) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return 'YO'
@@ -253,17 +313,87 @@ function initialsFromName(name) {
 }
 
 export function DataProvider({ children }) {
-  const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS)
-  const [gallery, setGallery] = useState(INITIAL_GALLERY)
-  const [staffList, setStaffList] = useState(STAFF)
-  const [services, setServices] = useState(INITIAL_SERVICES)
-  const [reviews, setReviews] = useState(INITIAL_REVIEWS)
-  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS)
-  const [offers, setOffers] = useState(INITIAL_OFFERS)
-  const [waitlist, setWaitlist] = useState(INITIAL_WAITLIST)
-  const [perDayHours, setPerDayHours] = useState(DEFAULT_PER_DAY_HOURS)
-  const [businessSettings, setBusinessSettings] = useState(DEFAULT_BUSINESS_SETTINGS)
-  const [clientProfile, setClientProfile] = useState(DEFAULT_CLIENT_PROFILE)
+  // Loaded once: the saved data from localStorage, or a fresh demo seed if there is none or it's
+  // unusable (see lib/persistence.js).
+  const [initial] = useState(() => loadState(buildSeedState()).state)
+  const [appointments, setAppointments] = useState(initial.appointments)
+  const [gallery, setGallery] = useState(initial.gallery)
+  const [staffList, setStaffList] = useState(initial.staffList)
+  const [services, setServices] = useState(initial.services)
+  const [reviews, setReviews] = useState(initial.reviews)
+  const [announcements, setAnnouncements] = useState(initial.announcements)
+  const [offers, setOffers] = useState(initial.offers)
+  const [waitlist, setWaitlist] = useState(initial.waitlist)
+  const [perDayHours, setPerDayHours] = useState(initial.perDayHours)
+  const [businessSettings, setBusinessSettings] = useState(initial.businessSettings)
+  const [clientProfile, setClientProfile] = useState(initial.clientProfile)
+  // Kept out of businessSettings on purpose: the Settings page edits a local copy of
+  // businessSettings and writes the whole object back on Save, which would revert toggles.
+  const [features, setFeatures] = useState(initial.features)
+  const [expenses, setExpenses] = useState(initial.expenses)
+  const [messagingSettings, setMessagingSettings] = useState(initial.messagingSettings)
+  const [messageLog, setMessageLog] = useState(initial.messageLog)
+  const { t, lang } = useLanguage()
+  const [receiptSettings, setReceiptSettings] = useState(initial.receiptSettings)
+  const [confirmations, setConfirmations] = useState(initial.confirmations)
+  // clientId → marketing consent. Only an explicit choice changes it (see lib/marketing.js).
+  const [marketingConsents, setMarketingConsents] = useState(initial.marketingConsents)
+  const setMarketingConsent = (clientId, consent) => setMarketingConsents((prev) => ({ ...prev, [clientId]: consent }))
+
+  const persisted = {
+    appointments,
+    gallery,
+    staffList,
+    services,
+    reviews,
+    announcements,
+    offers,
+    waitlist,
+    perDayHours,
+    businessSettings,
+    clientProfile,
+    features,
+    expenses,
+    messagingSettings,
+    messageLog,
+    receiptSettings,
+    confirmations,
+    marketingConsents,
+  }
+
+  // Save after any change to a persisted slice. A failed write (quota, blocked storage) is
+  // ignored: the session keeps working from memory.
+  useEffect(() => {
+    saveState(persisted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, Object.values(persisted))
+
+  // Wipes the saved data and puts every slice back to a fresh demo seed. Returns the new state
+  // so pages holding local copies (Settings' form) can resync.
+  const resetDemoData = () => {
+    clearState()
+    const seed = buildSeedState()
+    setAppointments(seed.appointments)
+    setGallery(seed.gallery)
+    setStaffList(seed.staffList)
+    setServices(seed.services)
+    setReviews(seed.reviews)
+    setAnnouncements(seed.announcements)
+    setOffers(seed.offers)
+    setWaitlist(seed.waitlist)
+    setPerDayHours(seed.perDayHours)
+    setBusinessSettings(seed.businessSettings)
+    setClientProfile(seed.clientProfile)
+    setFeatures(seed.features)
+    setExpenses(seed.expenses)
+    setMessagingSettings(seed.messagingSettings)
+    setMessageLog(seed.messageLog)
+    setReceiptSettings(seed.receiptSettings)
+    setConfirmations(seed.confirmations)
+    setMarketingConsents(seed.marketingConsents)
+    resetDraft()
+    return seed
+  }
 
   // Applied on <html> (not a nested div) so CSS variables reach modals rendered via
   // createPortal(..., document.body) too, not just the React tree under this provider.
@@ -280,15 +410,68 @@ export function DataProvider({ children }) {
   // Booking draft (multi-step client flow). staffId starts `undefined` (not yet
   // touched) rather than `null`, since `null` is itself a valid explicit choice
   // ("Any Available" / "No Preference") that the Continue button needs to unlock.
-  const [draft, setDraft] = useState({ serviceId: null, staffId: undefined, date: null, time: null })
+  const [draft, setDraft] = useState({ serviceId: null, staffId: undefined, date: null, time: null, marketingConsent: false })
 
   const setDraftService = (serviceId) => setDraft((d) => ({ ...d, serviceId }))
   const setDraftStaff = (staffId) => setDraft((d) => ({ ...d, staffId }))
   const setDraftDateTime = (date, time) => setDraft((d) => ({ ...d, date, time }))
-  const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null })
+  const resetDraft = () => setDraft({ serviceId: null, staffId: undefined, date: null, time: null, marketingConsent: false })
+  // Marketing opt-in on the booking form. Never pre-checked: every new draft starts false.
+  const setDraftMarketingConsent = (marketingConsent) => setDraft((d) => ({ ...d, marketingConsent }))
 
+  // --- Simulated automated messages -------------------------------------------------------
+  // Nothing is actually sent: entries record what *would* go out once a messaging backend is
+  // connected. The manager can still send any of them by hand through its WhatsApp link.
+  const renderMessage = (kind, appt) => {
+    const svc = services.find((s) => s.id === appt.serviceId)
+    const serviceLabel = svc ? (svc.nameKey ? t(svc.nameKey) : svc.name || '') : ''
+    return renderBookingMessage(kind, bookingMessageVars({ appointment: appt, businessName: businessSettings.name, serviceLabel, lang }), t)
+  }
+
+  const logMessage = (entry) =>
+    setMessageLog((prev) => [{ id: newId('msg'), createdAt: Date.now(), lang, ...entry }, ...prev])
+
+  // Automatic kinds respect the feature toggle and their own switch; manual sends (demo
+  // reminder) only need the feature on.
+  const logBookingMessage = (kind, appt, { manual = false } = {}) => {
+    if (features.messaging === false) return
+    if (!manual && !messagingSettings[kind]) return
+    logMessage({
+      kind,
+      appointmentId: appt.id,
+      clientName: appt.clientName,
+      phone: appt.clientPhone,
+      body: renderMessage(kind, appt),
+      manual,
+    })
+  }
+
+  // Campaigns are simulated too: one log entry with the full text and how many opted-in
+  // clients it would reach.
+  const logCampaign = ({ body, recipientCount }) => logMessage({ kind: 'marketing', body, recipientCount })
+
+  const updateMessagingSettings = (patch) => setMessagingSettings((prev) => ({ ...prev, ...patch }))
+
+  // Re-checks the slot at confirm time (it may have been taken since it was shown) and, for
+  // "any available", assigns the least busy free staff member. Returns null if the slot is gone.
   const confirmDraftBooking = () => {
-    const newAppt = {
+    const durationMinutes = services.find((s) => s.id === draft.serviceId)?.duration ?? 30
+    const slot = { date: draft.date, time: draft.time, durationMinutes, bookings: appointments }
+    let staffId = draft.staffId ?? null
+    let autoAssigned = false
+    if (features.staffAvailability !== false) {
+      if (!staffId) {
+        const free = freeStaffForSlot({ ...slot, staffIds: staffList.map((s) => s.id) })
+        if (!free.length) return null
+        staffId = free[0]
+        autoAssigned = true
+      } else if (hasConflict({ ...slot, staffId })) {
+        return null
+      }
+    } else if (hasConflict(slot)) {
+      return null
+    }
+    const newAppt = withBookingDefaults({
       id: newId('apt'),
       clientId: MOCK_CLIENT_ID,
       clientName: clientProfile.name || 'You',
@@ -296,20 +479,98 @@ export function DataProvider({ children }) {
       clientPhone: clientProfile.phone || '',
       clientEmail: clientProfile.email || '',
       serviceId: draft.serviceId,
-      staffId: draft.staffId,
+      staffId,
+      autoAssigned,
       date: draft.date,
       time: draft.time,
       status: 'confirmed',
-    }
+      createdAt: Date.now(),
+      marketingConsent: draft.marketingConsent === true,
+    }, services)
+    if (draft.marketingConsent === true) setMarketingConsent(MOCK_CLIENT_ID, true)
     setAppointments((prev) => [...prev, newAppt])
+    logBookingMessage('confirmation', newAppt)
     return newAppt
   }
 
-  const cancelAppointment = (id) =>
-    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status: 'cancelled' } : a)))
+  const cancelAppointment = (id) => {
+    const appt = appointments.find((a) => a.id === id)
+    if (appt && appt.status !== 'cancelled') logBookingMessage('cancellation', appt)
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? { ...a, status: 'cancelled', paymentStatus: a.paymentStatus === 'paid' ? 'paid' : 'cancelled', updatedAt: Date.now() }
+          : a,
+      ),
+    )
+  }
+
+  // Payment status/method/amount for one booking. Marking it cancelled also cancels the
+  // booking; un-cancelling a payment puts a cancelled booking back to confirmed.
+  const recordPayment = (id, { paymentStatus, paymentMethod, amountPaidAgorot }) => {
+    const appt = appointments.find((a) => a.id === id)
+    if (appt && paymentStatus === 'cancelled' && appt.status !== 'cancelled') logBookingMessage('cancellation', appt)
+    setAppointments((prev) =>
+      prev.map((a) => {
+        if (a.id !== id) return a
+        let status = a.status
+        if (paymentStatus === 'cancelled') status = 'cancelled'
+        else if (a.status === 'cancelled') status = 'confirmed'
+        return {
+          ...a,
+          status,
+          paymentStatus,
+          paymentMethod: paymentStatus === 'paid' ? paymentMethod : null,
+          amountPaidAgorot: paymentStatus === 'paid' ? amountPaidAgorot : null,
+          updatedAt: Date.now(),
+        }
+      }),
+    )
+  }
+
+  // Demo payment confirmation (NOT a tax document). One per booking: issuing again returns the
+  // existing one, so a number is never spent twice on the same payment.
+  const issueConfirmation = (appointmentId) => {
+    const existing = confirmations.find((c) => c.appointmentId === appointmentId)
+    if (existing) return existing
+    const appt = appointments.find((a) => a.id === appointmentId)
+    if (!canIssueConfirmation(appt)) return null
+    const confirmation = {
+      id: newId('pc'),
+      number: nextConfirmationNumber(confirmations),
+      appointmentId,
+      issuedAt: Date.now(),
+      clientName: appt.clientName,
+      serviceId: appt.serviceId,
+      appointmentDate: appt.date,
+      amountAgorot: appt.amountPaidAgorot,
+      paymentMethod: appt.paymentMethod,
+      businessType: receiptSettings.businessType,
+    }
+    setConfirmations((prev) => [...prev, confirmation])
+    return confirmation
+  }
+  const updateReceiptSettings = (patch) => setReceiptSettings((prev) => ({ ...prev, ...patch }))
+
+  const addExpense = (expense) => setExpenses((prev) => [{ id: newId('exp'), note: '', ...expense }, ...prev])
+  const updateExpense = (id, patch) =>
+    setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch, noteKey: 'note' in patch ? null : e.noteKey } : e)))
+  const removeExpense = (id) => setExpenses((prev) => prev.filter((e) => e.id !== id))
 
   const rescheduleAppointment = (id, date, time) =>
-    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, date, time, status: 'confirmed' } : a)))
+    setAppointments((prev) => prev.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              date,
+              time,
+              status: 'confirmed',
+              paymentStatus: a.paymentStatus === 'cancelled' ? 'unpaid' : a.paymentStatus,
+              updatedAt: Date.now(),
+            }
+          : a,
+      ),
+    )
 
   const updateAppointmentStatus = (id, status) =>
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)))
@@ -339,7 +600,7 @@ export function DataProvider({ children }) {
       initials: initialsFromName(name),
       rating,
       text,
-      date: toISODate(new Date()),
+      date: todayIso(),
     }
     setReviews((prev) => [review, ...prev])
     return review
@@ -376,6 +637,9 @@ export function DataProvider({ children }) {
 
   const getStaffById = (id) => staffList.find((s) => s.id === id)
 
+  const setFeature = (key, on) => setFeatures((prev) => ({ ...prev, [key]: on }))
+  const isFeatureOn = (key) => features[key] !== false
+
   const value = {
     appointments,
     gallery,
@@ -389,6 +653,13 @@ export function DataProvider({ children }) {
     businessSettings,
     clientProfile,
     draft,
+    features,
+    expenses,
+    messagingSettings,
+    receiptSettings,
+    confirmations,
+    marketingConsents,
+    messageLog,
 
     setDraftService,
     setDraftStaff,
@@ -396,6 +667,19 @@ export function DataProvider({ children }) {
     resetDraft,
     confirmDraftBooking,
     cancelAppointment,
+    recordPayment,
+    issueConfirmation,
+    setMarketingConsent,
+    setDraftMarketingConsent,
+    logCampaign,
+    updateReceiptSettings,
+    logBookingMessage,
+    logMessage,
+    renderMessage,
+    updateMessagingSettings,
+    addExpense,
+    updateExpense,
+    removeExpense,
     rescheduleAppointment,
     updateAppointmentStatus,
     approveWaitlist,
@@ -419,6 +703,9 @@ export function DataProvider({ children }) {
     updateBusinessSettings,
     updateClientProfile,
     getStaffById,
+    setFeature,
+    isFeatureOn,
+    resetDemoData,
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

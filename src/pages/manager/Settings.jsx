@@ -5,7 +5,12 @@ import { useData, serviceName, serviceDesc } from '../../context/DataContext'
 import { minutesToDuration } from '../../utils/date'
 import { THEME_PRESETS } from '../../themes'
 import ManagerTopBar from '../../components/manager/ManagerTopBar'
+import FeatureSettings from '../../components/manager/FeatureSettings'
+import ReceiptSettings from '../../components/manager/ReceiptSettings'
+import ResetDemoData from '../../components/manager/ResetDemoData'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { formatShekels, parseShekelsToAgorot, agorotToInput } from '../../lib/money'
+import { normalizePhone } from '../../lib/phone'
 
 const EMPTY_SERVICE = { name: '', description: '', price: '', duration: '' }
 
@@ -60,7 +65,7 @@ export default function BusinessSettings() {
     setServiceDraft({
       name: serviceName(svc, t),
       description: serviceDesc(svc, t),
-      price: svc.price,
+      price: agorotToInput(svc.priceAgorot),
       duration: svc.duration,
     })
     setShowServiceForm(true)
@@ -73,13 +78,14 @@ export default function BusinessSettings() {
   }
 
   const handleSaveService = guardSaveService(() => {
-    if (!serviceDraft.name.trim() || !serviceDraft.price || !serviceDraft.duration) return
+    const priceAgorot = parseShekelsToAgorot(serviceDraft.price)
+    if (!serviceDraft.name.trim() || priceAgorot === null || !serviceDraft.duration) return
     const patch = {
       name: serviceDraft.name.trim(),
       description: serviceDraft.description.trim(),
       nameKey: null,
       descKey: null,
-      price: Number(serviceDraft.price),
+      priceAgorot,
       duration: Number(serviceDraft.duration),
     }
     if (editingServiceId) {
@@ -130,6 +136,9 @@ export default function BusinessSettings() {
                     value={form.phone}
                     onChange={(e) => update({ phone: e.target.value })}
                   />
+                  {form.phone.trim() && !normalizePhone(form.phone) && (
+                    <p className="font-sans text-[12px] text-error">{t('contact.invalidPhone')}</p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1 md:col-span-2">
                   <label className="font-mono text-label-caps text-on-surface-variant">{t('Address')}</label>
@@ -142,6 +151,8 @@ export default function BusinessSettings() {
                 </div>
               </div>
             </div>
+
+            <FeatureSettings />
 
             <div className="bg-surface-container-lowest rounded-md p-6 shadow-card-client border border-outline-variant/30">
               <h2 className="font-sans text-headline-md text-primary mb-4 flex items-center gap-2">
@@ -287,6 +298,8 @@ export default function BusinessSettings() {
                       <input
                         type="number"
                         min="0"
+                        step="0.01"
+                        inputMode="decimal"
                         value={serviceDraft.price}
                         onChange={(e) => setServiceDraft((s) => ({ ...s, price: e.target.value }))}
                         className="input-field"
@@ -324,7 +337,7 @@ export default function BusinessSettings() {
                       <h3 className="font-sans text-base text-on-surface">{serviceName(svc, t)}</h3>
                       <p className="font-sans text-body-sm text-on-surface-variant truncate">{serviceDesc(svc, t)}</p>
                       <p className="font-mono text-label-caps text-on-surface-variant mt-1">
-                        ₪{svc.price} • {minutesToDuration(svc.duration, t)}
+                        {formatShekels(svc.priceAgorot)} • {minutesToDuration(svc.duration, t)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -348,6 +361,8 @@ export default function BusinessSettings() {
               </div>
             </div>
 
+            <ReceiptSettings />
+
             <div className="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant/30">
               {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}
               <button onClick={handleCancel} className="px-6 py-3 rounded-md font-sans text-headline-md text-primary border border-outline-variant hover:bg-surface-container-high transition-colors">
@@ -357,6 +372,13 @@ export default function BusinessSettings() {
                 {t('Save Changes')}
               </button>
             </div>
+
+            <ResetDemoData
+              onReset={(seed) => {
+                setForm({ ...seed.businessSettings })
+                closeServiceForm()
+              }}
+            />
           </div>
         </div>
       </main>

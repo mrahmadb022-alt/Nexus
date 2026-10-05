@@ -6,12 +6,16 @@ import { useData, serviceName } from '../../context/DataContext'
 import { formatDateFull, formatTime } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import { formatShekels } from '../../lib/money'
+import CalendarActions from '../../components/CalendarActions'
+import MarketingConsent from '../../components/client/MarketingConsent'
 
 export default function Confirmation() {
   const { t, lang, isRtl } = useLanguage()
   const navigate = useNavigate()
-  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services } = useData()
-  const [confirmed, setConfirmed] = useState(false)
+  const { draft, getStaffById, confirmDraftBooking, resetDraft, businessSettings, services, setDraftMarketingConsent, isFeatureOn } = useData()
+  const [confirmed, setConfirmed] = useState(null)
+  const [slotTaken, setSlotTaken] = useState(false)
   const [submitting, guard] = useSubmitGuard()
 
   const service = services.find((s) => s.id === draft.serviceId)
@@ -27,8 +31,9 @@ export default function Confirmation() {
   }, [draft, confirmed])
 
   const handleConfirm = guard(() => {
-    confirmDraftBooking()
-    setConfirmed(true)
+    const appt = confirmDraftBooking()
+    if (appt) setConfirmed(appt)
+    else setSlotTaken(true)
   })
 
   const handleDone = () => {
@@ -43,7 +48,16 @@ export default function Confirmation() {
           <CheckCircle2 size={40} />
         </div>
         <h1 className="font-sans text-display-lg text-on-background mb-3">{t('Booking Confirmed')}</h1>
-        <p className="font-sans text-body-lg text-on-surface-variant max-w-sm mb-8">{t('confirm.successBody')}</p>
+        <p className="font-sans text-body-lg text-on-surface-variant max-w-sm mb-2">{t('confirm.successBody')}</p>
+        {confirmed.autoAssigned && getStaffById(confirmed.staffId) && (
+          <p className="font-sans text-body-sm text-on-surface-variant mb-2">
+            {t('staff.assignedTo').replace('{name}', getStaffById(confirmed.staffId).name)}
+          </p>
+        )}
+        <div className="mb-4" />
+        <div className="mb-8">
+          <CalendarActions appointment={confirmed} />
+        </div>
         <button
           onClick={handleDone}
           className="h-14 px-8 bg-primary text-on-primary rounded-xl font-sans text-headline-md flex items-center gap-2 shadow-card-client-lg hover:bg-primary-container transition-all active:scale-95"
@@ -83,10 +97,14 @@ export default function Confirmation() {
               <div className="flex-grow flex flex-col gap-4">
                 <div>
                   <h3 className="font-sans text-headline-md text-on-background">{serviceName(service, t)}</h3>
-                  {staff && (
+                  {staff ? (
                     <p className="font-sans text-body-lg text-on-surface-variant mt-1">
                       {t('with')} {staff.name}
                     </p>
+                  ) : (
+                    isFeatureOn('staffAvailability') && (
+                      <p className="font-sans text-body-sm text-on-surface-variant mt-1">{t('staff.anyAssigned')}</p>
+                    )
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -106,7 +124,7 @@ export default function Confirmation() {
               </div>
               <div className="md:text-end flex flex-col gap-1 md:shrink-0 border-t md:border-t-0 md:border-s border-outline-variant pt-4 md:pt-0 md:ps-6">
                 <span className="font-mono text-label-caps text-on-surface-variant">{t('Total')}</span>
-                <span className="font-sans text-display-lg-mobile text-primary">₪{service.price}</span>
+                <span className="font-sans text-display-lg-mobile text-primary">{formatShekels(service.priceAgorot)}</span>
               </div>
             </div>
 
@@ -117,6 +135,21 @@ export default function Confirmation() {
                 <p className="font-sans text-body-sm text-on-surface-variant whitespace-pre-line">{businessSettings.address}</p>
               </div>
             </div>
+
+            {slotTaken && (
+              <div role="alert" className="p-4 rounded-xl bg-error-container/40 border border-error-container flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="font-sans text-body-sm text-on-background">{t('staff.slotTaken')}</p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/datetime')}
+                  className="shrink-0 bg-surface text-error border border-error px-4 py-2 rounded-full font-mono text-label-caps hover:bg-error-container transition-colors"
+                >
+                  {t('staff.pickAnother')}
+                </button>
+              </div>
+            )}
+
+            <MarketingConsent checked={draft.marketingConsent === true} onChange={setDraftMarketingConsent} />
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-outline-variant">
               <button

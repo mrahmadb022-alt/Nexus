@@ -3,11 +3,14 @@ import { createPortal } from 'react-dom'
 import { X, Clock } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useData } from '../../context/DataContext'
-import { formatDateLong, formatTime, generateSlots } from '../../utils/date'
+import { formatDateLong, formatTime } from '../../utils/date'
+import { useAvailability } from '../../hooks/useAvailability'
+import { hoursForDate } from '../../lib/availability'
 
 export default function AvailableSlotsModal({ date, onClose }) {
   const { t, lang } = useLanguage()
-  const { perDayHours, appointments } = useData()
+  const { perDayHours } = useData()
+  const availableSlotsFor = useAvailability()
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -22,12 +25,9 @@ export default function AvailableSlotsModal({ date, onClose }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const weekday = new Date(date + 'T00:00:00').getDay()
-  const hours = perDayHours[weekday]
-  const closed = !hours || !hours.working || hours.locked
-
-  const bookedTimes = appointments.filter((a) => a.date === date && a.status !== 'cancelled').map((a) => a.time)
-  const availableSlots = closed ? [] : generateSlots(hours.start, hours.end).filter((s) => !bookedTimes.includes(s))
+  const closed = !hoursForDate(perDayHours, date)
+  // 30-minute openings where at least one staff member is free.
+  const availableSlots = closed ? [] : availableSlotsFor({ date, durationMinutes: 30 })
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">

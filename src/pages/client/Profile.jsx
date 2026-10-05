@@ -8,6 +8,12 @@ import StatusPill from '../../components/StatusPill'
 import RescheduleModal from '../../components/client/RescheduleModal'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useSubmitGuard } from '../../hooks/useSubmitGuard'
+import ContactActions from '../../components/ContactActions'
+import CalendarActions from '../../components/CalendarActions'
+import { useBookingMessage } from '../../hooks/useBookingMessage'
+import { normalizePhone } from '../../lib/phone'
+import MarketingConsent from '../../components/client/MarketingConsent'
+import { todayIso as todayInTz } from '../../lib/time'
 
 export default function Profile() {
   const { t, lang } = useLanguage()
@@ -23,7 +29,12 @@ export default function Profile() {
     clientProfile,
     updateClientProfile,
     services,
+    businessSettings,
+    isFeatureOn,
+    marketingConsents,
+    setMarketingConsent,
   } = useData()
+  const bookingMessage = useBookingMessage()
   const [rescheduling, setRescheduling] = useState(null)
   const [form, setForm] = useState(clientProfile)
   const [saved, setSaved] = useState(false)
@@ -35,7 +46,7 @@ export default function Profile() {
     }
   }, [location.hash])
 
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = todayInTz()
 
   const mine = appointments.filter((a) => a.clientId === MOCK_CLIENT_ID)
   const upcoming = mine
@@ -87,6 +98,9 @@ export default function Profile() {
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               />
+              {isFeatureOn('contact') && form.phone.trim() && !normalizePhone(form.phone) && (
+                <p className="font-sans text-[12px] text-error">{t('contact.invalidPhone')}</p>
+              )}
             </div>
             <div className="flex flex-col gap-1 sm:col-span-2">
               <label className="font-mono text-label-caps text-on-surface-variant">
@@ -100,6 +114,11 @@ export default function Profile() {
               />
             </div>
           </div>
+          <MarketingConsent
+            id="profile-marketing-consent"
+            checked={marketingConsents[MOCK_CLIENT_ID] === true}
+            onChange={(on) => setMarketingConsent(MOCK_CLIENT_ID, on)}
+          />
           <div className="flex items-center gap-3 justify-end">
             {saved && <span className="font-sans text-body-sm text-on-success-container">{t('Save Changes')} ✓</span>}
             <button onClick={handleSaveProfile} disabled={savingProfile} className="btn-primary px-6 py-2.5 disabled:opacity-60 disabled:pointer-events-none">
@@ -153,6 +172,12 @@ export default function Profile() {
                       <XCircle size={18} /> {t('Cancel')}
                     </button>
                   </div>
+                  <CalendarActions appointment={appt} />
+                  <ContactActions
+                    variant="inline"
+                    phone={businessSettings.phone}
+                    message={bookingMessage('clientToBusiness', appt)}
+                  />
                 </div>
               )
             })}

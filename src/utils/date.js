@@ -18,7 +18,20 @@ export function startOfWeek(date) {
   return addDays(d, -day)
 }
 
-const LOCALE_MAP = { en: 'en-US', he: 'he-IL', ar: 'ar' }
+// Gregorian calendar + Western (latn) digits in every language — plain 'ar' renders Arabic-Indic digits.
+export const LOCALE_MAP = { en: 'en-US', he: 'he-IL-u-ca-gregory-nu-latn', ar: 'ar-u-ca-gregory-nu-latn' }
+
+// Epoch ms → "Oct 6, 14:00" on the Jerusalem clock, 24h, Western digits.
+export function formatStamp(ms, lang) {
+  return new Date(ms).toLocaleString(LOCALE_MAP[lang] || 'en-US', {
+    timeZone: 'Asia/Jerusalem',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+}
 
 export function formatDateLong(isoDate, lang) {
   const d = new Date(isoDate + 'T00:00:00')

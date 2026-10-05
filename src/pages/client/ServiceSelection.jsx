@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useData, serviceName, serviceDesc } from '../../context/DataContext'
 import { minutesToDuration } from '../../utils/date'
 import StepIndicator from '../../components/client/StepIndicator'
+import { formatShekels } from '../../lib/money'
 
 export default function ServiceSelection() {
   const { t, isRtl } = useLanguage()
@@ -65,7 +66,7 @@ export default function ServiceSelection() {
                   <p className="font-sans text-body-sm text-on-surface-variant mb-4 line-clamp-2">{serviceDesc(svc, t)}</p>
                   <div className="flex justify-between items-center mt-auto pt-4 border-t border-surface-variant">
                     <span className={`font-sans text-headline-md ${active ? 'text-primary' : 'text-on-background'}`}>
-                      ₪{svc.price}
+                      {formatShekels(svc.priceAgorot)}
                     </span>
                     <div className="flex items-center text-on-surface-variant font-mono text-data-tabular gap-1">
                       <Clock size={16} />
@@ -83,7 +84,7 @@ export default function ServiceSelection() {
         <div className="fixed bottom-20 md:bottom-0 start-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-4 pb-safe z-30 md:relative md:bg-transparent md:border-none md:pb-8">
           <div className="max-w-container-max mx-auto flex justify-between items-center gap-4">
             <div className="hidden md:block text-on-surface-variant">
-              <span className="font-bold text-on-background">{t('Total')}:</span> ₪{selectedService.price}{' '}
+              <span className="font-bold text-on-background">{t('Total')}:</span> {formatShekels(selectedService.priceAgorot)}{' '}
               <span className="mx-2">•</span> {minutesToDuration(selectedService.duration, t)}
             </div>
             <button

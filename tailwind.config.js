@@ -51,6 +51,10 @@ export default {
         background: 'rgb(var(--color-background) / <alpha-value>)',
         'on-background': 'rgb(var(--color-on-background) / <alpha-value>)',
         'surface-variant': 'rgb(var(--color-surface-variant) / <alpha-value>)',
+        // Two-series chart colors (finance trend). Validated for CVD separation and 3:1 contrast on
+        // light and dark surfaces; dark themes get their own steps in index.css.
+        'viz-income': 'rgb(var(--viz-income) / <alpha-value>)',
+        'viz-expense': 'rgb(var(--viz-expense) / <alpha-value>)',
 
         // Status/semantic colors: intentionally NOT themed — they carry fixed meaning
         // (confirmed/error/pending) across every preset, same as before this feature.
